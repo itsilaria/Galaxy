@@ -9,13 +9,13 @@ export default function SupportButton() {
 
     return (
         <a
-            href="https://www.paypal.me/yourusername" // User will need to change this
+            href="https://www.paypal.me/ilariamattana"
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-4 left-1/2 -translate-x-1/2 pointer-events-auto z-20 
-                       bg-white/10 hover:bg-white/20 backdrop-blur-md px-6 py-2 rounded-full 
-                       border border-white/10 text-white/60 text-[10px] uppercase tracking-[0.2em]
-                       transition-all hover:text-white hover:scale-110 shadow-lg"
+            className="fixed top-24 right-4 md:right-8 pointer-events-auto z-20 
+                       bg-white/5 hover:bg-white/15 backdrop-blur-md px-4 py-2 rounded-full 
+                       border border-white/10 text-white/50 text-[9px] uppercase tracking-[0.2em]
+                       transition-all hover:text-white hover:scale-105 shadow-lg"
         >
             {t.support}
         </a>
