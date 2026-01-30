@@ -9,7 +9,7 @@ export default function SupportButton() {
 
     return (
         <a
-            href="https://www.paypal.me/perunbro"
+            href="https://www.buymeacoffee.com/perunbro"
             target="_blank"
             rel="noopener noreferrer"
             className="fixed top-32 right-4 md:right-8 pointer-events-auto z-40 
