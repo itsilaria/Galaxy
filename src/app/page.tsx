@@ -6,6 +6,7 @@ import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
 import LanguageSelector from "@/components/UI/LanguageSelector";
 import RandomJumpButton from "@/components/UI/RandomJumpButton";
 import LoadingScreen from "@/components/UI/LoadingScreen";
+import SupportButton from "@/components/UI/SupportButton";
 import { useGalaxyStore } from "@/store/useGalaxyStore";
 import { translations } from "@/utils/translations";
 
@@ -36,6 +37,7 @@ export default function Home() {
             <ComposeSecretOverlay />
             <LanguageSelector />
             <RandomJumpButton />
+            <SupportButton />
 
             {/* UI Overlay */}
             <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-10 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0">

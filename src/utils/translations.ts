@@ -9,6 +9,9 @@ export const translations = {
         send: "Send to Space",
         cancel: "Cancel",
         online: "EXPLORERS ONLINE",
+        support: "Support the Galaxy",
+        premiumTitle: "🌟 Become a Supernova",
+        premiumDesc: "Make your star bigger and brighter forever.",
         footer: "Exo-Galaxy Project • Global Edition"
     },
     it: {
@@ -21,6 +24,9 @@ export const translations = {
         send: "Invia nello Spazio",
         cancel: "Annulla",
         online: "ESPLORATORI ONLINE",
+        support: "Sostieni la Galassia",
+        premiumTitle: "🌟 Diventa una Supernova",
+        premiumDesc: "Rendi la tua stella più grande e luminosa per sempre.",
         footer: "Progetto Exo-Galaxy • Edizione Globale"
     },
     es: {

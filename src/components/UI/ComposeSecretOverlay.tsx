@@ -23,7 +23,19 @@ export default function ComposeSecretOverlay() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
             <div className="w-full max-w-md">
                 <h2 className="text-2xl font-bold text-white mb-2 text-center">{t.modalTitle}</h2>
-                <p className="text-center text-white/50 mb-6 text-sm">{t.composeSubtitle}</p>
+                <p className="text-center text-white/50 mb-4 text-sm">{t.composeSubtitle}</p>
+
+                <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 mb-6 group cursor-pointer hover:border-purple-400/50 transition-all">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl animate-pulse">
+                            🌟
+                        </div>
+                        <div>
+                            <h4 className="text-white text-xs font-bold uppercase tracking-wider">{t.premiumTitle}</h4>
+                            <p className="text-white/40 text-[10px]">{t.premiumDesc}</p>
+                        </div>
+                    </div>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <textarea
