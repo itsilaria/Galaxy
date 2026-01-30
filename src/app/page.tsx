@@ -5,6 +5,7 @@ import SecretModal from "@/components/UI/SecretModal";
 import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
 import LanguageSelector from "@/components/UI/LanguageSelector";
 import RandomJumpButton from "@/components/UI/RandomJumpButton";
+import LoadingScreen from "@/components/UI/LoadingScreen";
 import { useGalaxyStore } from "@/store/useGalaxyStore";
 import { translations } from "@/utils/translations";
 
@@ -28,6 +29,7 @@ export default function Home() {
 
     return (
         <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
+            <LoadingScreen />
             <Scene />
 
             <SecretModal />

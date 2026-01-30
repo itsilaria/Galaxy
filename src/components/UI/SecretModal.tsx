@@ -28,10 +28,11 @@ export default function SecretModal() {
             />
 
             <div className={`
-        relative bg-black/80 border border-white/20 p-8 rounded-2xl max-w-lg w-full 
-        shadow-[0_0_50px_rgba(255,255,255,0.1)] transform transition-all duration-300
-        ${isModalOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}
-      `}>
+                relative bg-black/90 border border-white/20 p-6 md:p-8 rounded-3xl max-w-lg w-full 
+                max-h-[85vh] overflow-y-auto custom-scrollbar
+                shadow-[0_0_50px_rgba(255,255,255,0.1)] transform transition-all duration-500
+                ${isModalOpen ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-8 opacity-0'}
+            `}>
                 <button
                     onClick={closeModal}
                     className="absolute top-4 right-4 text-white/50 hover:text-white"
@@ -43,7 +44,7 @@ export default function SecretModal() {
                     Incoming Transmission
                 </h3>
 
-                <p className="text-xl md:text-2xl font-light text-white leading-relaxed italic">
+                <p className="text-lg md:text-2xl font-light text-white leading-relaxed italic break-words">
                     "{selectedSecret?.text}"
                 </p>
 
