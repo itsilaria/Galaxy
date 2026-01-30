@@ -15,9 +15,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "The Galaxy of Secrets | An Anonymous Confession Universe",
   description: "Share your deepest secrets anonymously in a beautiful 3D galaxy. Watch your confession become a star in the constellation of human mysteries.",
+  keywords: ["secrets", "anonymous confessions", "3D galaxy", "interactive art", "mystery", "segreti", "anonimo"],
+  authors: [{ name: "The Galaxy Explorer" }],
   openGraph: {
     title: "The Galaxy of Secrets",
     description: "What's your secret? Add it to the constellation.",
+    url: "https://galassia-segreta-2026.vercel.app/",
+    siteName: "The Galaxy of Secrets",
     type: "website",
     images: [
       {
@@ -26,6 +30,12 @@ export const metadata: Metadata = {
         height: 630,
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Galaxy of Secrets",
+    description: "Share your secret anonymously in the 3D galaxy.",
+    images: ["/og-image.png"],
   },
   verification: {
     google: "google9c5f88a16208260f",
