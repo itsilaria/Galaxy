@@ -21,11 +21,14 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image.png", // We should mention the user might want a custom image here
+        url: "/og-image.png",
         width: 1200,
         height: 630,
       },
     ],
+  },
+  verification: {
+    google: "google9c5f88a16208260f",
   },
 };
 
