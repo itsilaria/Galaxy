@@ -39,6 +39,9 @@ export const translations = {
         send: "Enviar al Espacio",
         cancel: "Cancelar",
         online: "EXPLORADORES EN LÍNEA",
+        support: "Apoya la Galaxia",
+        premiumTitle: "🌟 Conviértete en Supernova",
+        premiumDesc: "Haz tu estrella más grande y brillante para siempre.",
         footer: "Proyecto Exo-Galaxy • Edición Global"
     },
     fr: {
@@ -51,6 +54,9 @@ export const translations = {
         send: "Envoyer dans l'Espace",
         cancel: "Annuler",
         online: "EXPLORATEURS EN LIGNE",
+        support: "Soutenez la Galaxie",
+        premiumTitle: "🌟 Devenez une Supernova",
+        premiumDesc: "Rendez votre étoile plus grande et plus brillante pour toujours.",
         footer: "Projet Exo-Galaxy • Édition Mondiale"
     },
     de: {
@@ -63,6 +69,9 @@ export const translations = {
         send: "Ins All Senden",
         cancel: "Abbrechen",
         online: "ENTDECKER ONLINE",
+        support: "Unterstütze die Galaxie",
+        premiumTitle: "🌟 Werden Sie zur Supernova",
+        premiumDesc: "Machen Sie Ihren Stern für immer größer und hellere.",
         footer: "Exo-Galaxy Projekt • Global Edition"
     },
     jp: {
@@ -75,6 +84,9 @@ export const translations = {
         send: "宇宙へ送る",
         cancel: "キャンセル",
         online: "オンラインの探検家",
+        support: "銀河をサポートする",
+        premiumTitle: "🌟 超新星になる",
+        premiumDesc: "あなたの星を永遠に大きく、明るくしましょう。",
         footer: "Exo-Galaxy プロジェクト • グローバル版"
     }
 };
