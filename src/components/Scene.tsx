@@ -1,5 +1,5 @@
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
-import { Suspense, useRef } from 'react';
+import { Suspense, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame, Canvas } from '@react-three/fiber';
 
@@ -24,6 +24,17 @@ const WarpStars = () => {
 
 
 export default function Scene() {
+    const [sparkleCount, setSparkleCount] = useState({ c1: 2000, c2: 1000 });
+
+    useEffect(() => {
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        if (isMobile) {
+            setSparkleCount({ c1: 600, c2: 300 });
+        }
+    }, []);
+
+    const { c1, c2 } = sparkleCount;
+
     return (
         <div className="w-full h-full bg-black">
             <Canvas
@@ -37,9 +48,9 @@ export default function Scene() {
 
                 <Suspense fallback={null}>
                     <WarpStars />
-                    <Sparkles count={2000} scale={120} size={2} speed={0.4} opacity={0.5} color="#ffeebb" />
+                    <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.5} color="#ffeebb" />
 
-                    <Sparkles count={1000} scale={60} size={4} speed={0.2} opacity={0.8} color="#ffaaee" />
+                    <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.8} color="#ffaaee" />
                     <StarField />
                     <CameraController />
                 </Suspense>
