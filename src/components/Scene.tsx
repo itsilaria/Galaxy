@@ -47,6 +47,9 @@ export default function Scene() {
                     maxDistance={80}
                     autoRotate={true}
                     autoRotateSpeed={0.5}
+                    makeDefault
+                    enableDamping={true}
+                    dampingFactor={0.05}
                 />
             </Canvas>
         </div>

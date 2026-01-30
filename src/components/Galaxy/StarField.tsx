@@ -36,6 +36,10 @@ const Star = ({ secret }: { secret: Secret }) => {
                     e.stopPropagation();
                     selectSecret(secret);
                 }}
+                onPointerDown={(e) => {
+                    e.stopPropagation();
+                    selectSecret(secret);
+                }}
                 onPointerOver={(e) => {
                     e.stopPropagation();
                     setHover(true);

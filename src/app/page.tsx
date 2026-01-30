@@ -27,39 +27,44 @@ export default function Home() {
     }, []);
 
     return (
-        <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
-            <Scene />
+        <div className="w-full h-full bg-black">
+            <Canvas
+                camera={{ position: [0, 0, 30], fov: 60 }}
+                dpr={[1, 2]} // Performance: limit resolution on high-density screens
+                gl={{ antialias: true, alpha: false }}
+            >       <Scene />
 
-            <SecretModal />
-            <ComposeSecretOverlay />
-            <LanguageSelector />
-            <RandomJumpButton />
+                <SecretModal />
+                <ComposeSecretOverlay />
+                <LanguageSelector />
+                <RandomJumpButton />
+            </Canvas>
 
             {/* UI Overlay */}
-            <div className="absolute top-0 left-0 p-8 pointer-events-none z-10 w-full flex justify-between items-start">
-                <div>
-                    <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-pink-200 tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-10 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0">
+                <div className="bg-black/20 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-2 md:p-0 rounded-lg">
+                    <h1 className="text-3xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-pink-200 tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] leading-none">
                         {t.title}
                     </h1>
-                    <p className="text-white/60 text-sm md:text-base mt-2 max-w-md leading-relaxed">
+                    <p className="text-white/60 text-[10px] md:text-base mt-1 md:mt-2 max-w-[200px] md:max-w-md leading-relaxed">
                         {t.subtitle}
                     </p>
                 </div>
 
                 <button
                     onClick={() => startAddingSecret()}
-                    className="pointer-events-auto bg-white/5 hover:bg-white/10 active:scale-95 backdrop-blur-xl text-white px-8 py-3 rounded-full border border-white/20 transition-all font-medium glow-hover shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                    className="pointer-events-auto bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-xl text-white px-6 md:px-8 py-2 md:py-3 rounded-full border border-white/20 transition-all text-xs md:text-base font-medium glow-hover shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                 >
                     {t.button}
                 </button>
             </div>
 
-            <div className="absolute bottom-8 left-8 text-white/40 font-mono text-xs flex items-center gap-2">
+            <div className="absolute bottom-4 md:bottom-8 left-4 md:left-8 text-white/40 font-mono text-[10px] md:text-xs flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 {liveVisitors.toLocaleString()} {t.online}
             </div>
 
-            <div className="absolute bottom-8 right-8 pointer-events-none text-white/20 text-xs tracking-widest uppercase">
+            <div className="absolute bottom-4 md:bottom-8 right-4 md:right-8 pointer-events-none text-white/10 text-[8px] md:text-xs tracking-widest uppercase">
                 {t.footer}
             </div>
         </main>

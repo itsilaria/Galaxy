@@ -15,7 +15,7 @@ export default function LanguageSelector() {
     const { currentLanguage, setLanguage } = useGalaxyStore();
 
     return (
-        <div className="absolute bottom-16 right-8 pointer-events-auto z-20 flex gap-2 flex-wrap justify-end max-w-[200px]">
+        <div className="absolute bottom-20 md:bottom-16 right-4 md:right-8 pointer-events-auto z-20 flex gap-1 md:gap-2 flex-wrap justify-end max-w-[150px] md:max-w-[200px]">
             {languages.map((lang) => (
                 <button
                     key={lang.code}
