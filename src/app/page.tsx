@@ -27,18 +27,13 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="w-full h-full bg-black">
-            <Canvas
-                camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={[1, 2]} // Performance: limit resolution on high-density screens
-                gl={{ antialias: true, alpha: false }}
-            >       <Scene />
+        <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
+            <Scene />
 
-                <SecretModal />
-                <ComposeSecretOverlay />
-                <LanguageSelector />
-                <RandomJumpButton />
-            </Canvas>
+            <SecretModal />
+            <ComposeSecretOverlay />
+            <LanguageSelector />
+            <RandomJumpButton />
 
             {/* UI Overlay */}
             <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-10 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0">

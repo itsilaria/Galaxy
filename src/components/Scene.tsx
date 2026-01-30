@@ -26,7 +26,11 @@ const WarpStars = () => {
 export default function Scene() {
     return (
         <div className="w-full h-full bg-black">
-            <Canvas camera={{ position: [0, 0, 30], fov: 60 }}>
+            <Canvas
+                camera={{ position: [0, 0, 30], fov: 60 }}
+                dpr={[1, 2]}
+                gl={{ antialias: true, alpha: false }}
+            >
                 <fog attach="fog" args={['#000000', 10, 100]} />
                 <ambientLight intensity={0.2} />
                 <pointLight position={[10, 10, 10]} intensity={1} />
