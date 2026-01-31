@@ -3,6 +3,7 @@
 import { useGalaxyStore } from '@/store/useGalaxyStore';
 import { translations } from '@/utils/translations';
 import { useState } from 'react';
+import { containsProfanity } from '@/utils/profanityFilter';
 
 export default function ComposeSecretOverlay() {
     const { isAddingSecret, cancelAddingSecret, addSecret, currentLanguage } = useGalaxyStore();
@@ -18,9 +19,18 @@ export default function ComposeSecretOverlay() {
         { id: 'green', color: '#00fca8', label: t.colorGreen },
     ];
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+
         if (text.trim()) {
+            if (containsProfanity(text)) {
+                setError(t.errorProfanity);
+                return;
+            }
+
             if (starType === 'supernova') {
                 // Open Buy Me A Coffee in a new tab for payment
                 window.open('https://buymeacoffee.com/perunbro', '_blank');
@@ -28,6 +38,7 @@ export default function ComposeSecretOverlay() {
             addSecret(text, starType === 'supernova', starType, starType === 'supernova' ? selectedColor : undefined);
             setText('');
             setStarType('standard');
+            setError(null);
         }
     };
 
@@ -105,6 +116,12 @@ export default function ComposeSecretOverlay() {
                             {text.length} chars
                         </div>
                     </div>
+
+                    {error && (
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs text-center animate-shake">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="flex gap-4">
                         <button
