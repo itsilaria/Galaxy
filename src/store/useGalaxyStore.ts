@@ -24,6 +24,7 @@ interface GalaxyState {
     visitorCount: number;
     currentLanguage: SupportedLanguage;
     isWarping: boolean;
+    isStarted: boolean;
 
     // Actions
     setLanguage: (lang: SupportedLanguage) => void;
@@ -33,6 +34,7 @@ interface GalaxyState {
     startAddingSecret: () => void;
     cancelAddingSecret: () => void;
     addSecret: (text: string, isPremium?: boolean, starType?: 'standard' | 'supernova', glowColor?: string) => void;
+    startGalaxy: () => void;
 }
 
 // Mock data generator
@@ -83,6 +85,7 @@ export const useGalaxyStore = create<GalaxyState>((set) => ({
     visitorCount: 1243, // Initial realistic number
     currentLanguage: 'en',
     isWarping: false,
+    isStarted: false,
 
     setLanguage: (lang) => {
         set({ isWarping: true });
@@ -100,16 +103,19 @@ export const useGalaxyStore = create<GalaxyState>((set) => ({
     closeModal: () => set({ isModalOpen: false, selectedSecret: null }),
     startAddingSecret: () => set({ isAddingSecret: true }),
     cancelAddingSecret: () => set({ isAddingSecret: false }),
-    addSecret: (text) => set((state) => {
+    startGalaxy: () => set({ isStarted: true }),
+    addSecret: (text, isPremium, starType, glowColor) => set((state) => {
         // Add new secret at a random position close to center for now
         const newSecret: Secret = {
             id: `new-${Date.now()}`,
             text,
             position: [(Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10],
-            color: '#ff00aa', // New secrets are hot pink
+            color: isPremium ? (glowColor || '#ffd700') : '#ff00aa',
             timestamp: Date.now(),
             language: state.currentLanguage,
-            country: state.currentLanguage.toUpperCase(), // Simplification
+            country: state.currentLanguage.toUpperCase(),
+            starType: starType || 'standard',
+            isPremium
         };
         return { secrets: [...state.secrets, newSecret], isAddingSecret: false };
     }),

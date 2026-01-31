@@ -4,10 +4,18 @@ import { useEffect, useRef, useState } from 'react';
 import { useGalaxyStore } from '@/store/useGalaxyStore';
 
 export default function BackgroundAudio() {
+    const { isStarted } = useGalaxyStore();
+
     const [isMuted, setIsMuted] = useState(true);
     const audioContext = useRef<AudioContext | null>(null);
     const oscillators = useRef<OscillatorNode[]>([]);
     const gainNode = useRef<GainNode | null>(null);
+
+    useEffect(() => {
+        if (isStarted && isMuted) {
+            startAudio();
+        }
+    }, [isStarted]);
 
     const startAudio = async () => {
         try {
