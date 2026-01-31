@@ -30,8 +30,8 @@ export default function SecretModal() {
             />
 
             <div className={`
-                relative bg-black/95 border p-6 md:p-10 rounded-[2.5rem] max-w-lg w-full 
-                max-h-[85vh] overflow-y-auto custom-scrollbar
+                relative bg-black/95 border p-6 md:p-10 rounded-[2.5rem] max-w-[90vw] md:max-w-lg w-full 
+                max-h-[80vh] flex flex-col
                 shadow-[0_0_80px_rgba(0,0,0,0.5)] transform transition-all duration-500
                 ${isSupernova ? 'border-yellow-500/50' : 'border-white/10'}
                 ${isModalOpen ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-8 opacity-0'}
@@ -42,22 +42,24 @@ export default function SecretModal() {
 
                 <button
                     onClick={closeModal}
-                    className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                    className="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all z-20"
                 >
                     ✕
                 </button>
 
-                <h3 className={`text-[10px] font-black uppercase tracking-[0.4em] mb-6 ${isSupernova ? 'text-yellow-500' : 'text-white/30'}`}>
-                    {isSupernova ? '✨ Supernova Transmission' : 'Incoming Transmission'}
-                </h3>
+                <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 pt-4">
+                    <h3 className={`text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] mb-4 md:mb-6 ${isSupernova ? 'text-yellow-500' : 'text-white/30'}`}>
+                        {isSupernova ? '✨ Supernova Transmission' : 'Incoming Transmission'}
+                    </h3>
 
-                <p className={`text-xl md:text-3xl font-medium leading-tight italic break-words ${isSupernova ? 'text-white' : 'text-white/80'}`}>
-                    "{selectedSecret?.text}"
-                </p>
+                    <p className={`text-lg md:text-3xl font-medium leading-tight italic break-words ${isSupernova ? 'text-white' : 'text-white/80'}`}>
+                        "{selectedSecret?.text}"
+                    </p>
 
-                <div className="mt-12 pt-6 border-t border-white/5 flex justify-between items-center text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                    <span>Origin: {selectedSecret?.country}</span>
-                    <span>{new Date(selectedSecret?.timestamp || 0).toLocaleDateString()}</span>
+                    <div className="mt-8 md:mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0 text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                        <span>Origin: {selectedSecret?.country}</span>
+                        <span>{new Date(selectedSecret?.timestamp || 0).toLocaleDateString()}</span>
+                    </div>
                 </div>
             </div>
         </div>
