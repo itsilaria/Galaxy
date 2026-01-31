@@ -69,8 +69,6 @@ export default function StarField() {
 
     const meshRef = useRef<THREE.InstancedMesh>(null!);
     const dummy = useMemo(() => new THREE.Object3D(), []);
-
-    // Color caching to avoid new THREE.Color allocations in frame loop
     const colors = useMemo(() => standardStars.map(s => new THREE.Color(s.color)), [standardStars]);
 
     useEffect(() => {
@@ -84,7 +82,7 @@ export default function StarField() {
         });
         meshRef.current.instanceMatrix.needsUpdate = true;
         if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
-    }, [standardStars, dummy, colors]);
+    }, [standardStars, colors, dummy]);
 
     useFrame((state) => {
         if (!meshRef.current) return;
