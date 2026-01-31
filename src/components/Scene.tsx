@@ -24,32 +24,24 @@ const WarpStars = () => {
 
 
 const Nebula = () => {
-    const points = useMemo(() => {
-        const p = [];
-        for (let i = 0; i < 50; i++) {
-            p.push(new THREE.Vector3(
-                (Math.random() - 0.5) * 100,
-                (Math.random() - 0.5) * 100,
-                (Math.random() - 0.5) * 100
-            ));
-        }
-        return p;
-    }, []);
-
-    const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa'];
+    const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa', '#33ffaa'];
 
     return (
         <group>
-            {points.map((pos: THREE.Vector3, i: number) => (
+            {colors.map((color, i) => (
                 <Sparkles
                     key={i}
-                    position={pos}
-                    count={50}
-                    scale={20}
+                    position={new THREE.Vector3(
+                        (Math.random() - 0.5) * 60,
+                        (Math.random() - 0.5) * 60,
+                        (Math.random() - 0.5) * 60
+                    )}
+                    count={200}
+                    scale={40}
                     size={6}
                     speed={0.1}
-                    opacity={0.15}
-                    color={colors[i % colors.length]}
+                    opacity={0.1}
+                    color={color}
                 />
             ))}
         </group>
@@ -66,6 +58,7 @@ export default function Scene() {
         }
     }, []);
 
+    const isModalOpen = useGalaxyStore(s => s.isModalOpen);
     const { c1, c2 } = sparkleCount;
 
     return (
@@ -93,7 +86,7 @@ export default function Scene() {
                     enableZoom={true}
                     minDistance={5}
                     maxDistance={80}
-                    autoRotate={true}
+                    autoRotate={!isModalOpen}
                     autoRotateSpeed={0.5}
                     makeDefault
                     enableDamping={true}

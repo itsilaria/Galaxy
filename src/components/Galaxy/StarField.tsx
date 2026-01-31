@@ -1,25 +1,28 @@
 'use client';
 
-import { useRef, useMemo, useState } from 'react';
+import { useRef, useState, memo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
 import { useGalaxyStore, Secret } from '@/store/useGalaxyStore';
 
-const Star = ({ secret }: { secret: Secret }) => {
+const Star = memo(({ secret }: { secret: Secret }) => {
     const mesh = useRef<THREE.Mesh>(null!);
     const glowMesh = useRef<THREE.Mesh>(null!);
     const materialRef = useRef<THREE.MeshStandardMaterial>(null!);
-    const { selectSecret, selectedSecret } = useGalaxyStore();
+
+    // Selectors to prevent unnecessary re-renders of ALL stars
+    const selectSecret = useGalaxyStore(s => s.selectSecret);
+    const selectedId = useGalaxyStore(s => s.selectedSecret?.id);
+
     const [hovered, setHover] = useState(false);
     const pointerDownPos = useRef<[number, number] | null>(null);
     const energyLevel = useRef(0);
 
-    const isSelected = selectedSecret?.id === secret.id;
+    const isSelected = selectedId === secret.id;
     const isSupernova = secret.starType === 'supernova';
 
     useFrame((state, delta) => {
-        if (!mesh.current) return;
+        if (!mesh.current || !materialRef.current) return;
 
         // Gentle rotation
         mesh.current.rotation.x += delta * (isSupernova ? 0.3 : 0.1);
@@ -40,15 +43,13 @@ const Star = ({ secret }: { secret: Secret }) => {
             glowMesh.current.rotation.z -= delta * 0.5;
         }
 
-        // Handle energy pulse via materials to avoid React renders
+        // Handle energy pulse and intensity via materials to avoid React state re-renders
         if (energyLevel.current > 0) {
             energyLevel.current = Math.max(0, energyLevel.current - delta * 3);
         }
 
-        if (materialRef.current) {
-            const baseEmissive = isSelected ? 5 : (isSupernova ? 4.0 : (hovered ? 2 : 0.8));
-            materialRef.current.emissiveIntensity = baseEmissive + energyLevel.current;
-        }
+        const baseEmissive = isSelected ? 5 : (isSupernova ? 4.0 : (hovered ? 2 : 0.8));
+        materialRef.current.emissiveIntensity = baseEmissive + energyLevel.current;
     });
 
     const handlePointerDown = (e: any) => {
@@ -63,10 +64,10 @@ const Star = ({ secret }: { secret: Secret }) => {
         const dy = e.clientY - pointerDownPos.current[1];
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Increased threshold to 15px for safe mobile dragging
+        // Threshold of 15px for safe mobile dragging
         if (dist < 15) {
             e.stopPropagation();
-            energyLevel.current = 4; // Bright fire flash
+            energyLevel.current = 5; // Intense flash
             selectSecret(secret);
         }
         pointerDownPos.current = null;
@@ -118,7 +119,9 @@ const Star = ({ secret }: { secret: Secret }) => {
             </mesh>
         </group>
     );
-};
+});
+
+Star.displayName = 'Star';
 
 export default function StarField() {
     const secrets = useGalaxyStore((state) => state.secrets);

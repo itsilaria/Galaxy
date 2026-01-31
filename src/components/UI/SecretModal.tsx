@@ -7,8 +7,11 @@ export default function SecretModal() {
     const { selectedSecret, isModalOpen, closeModal } = useGalaxyStore();
     const [isVisible, setIsVisible] = useState(false);
 
+    const openTime = useRef<number>(0);
+
     useEffect(() => {
         if (isModalOpen) {
+            openTime.current = Date.now();
             setIsVisible(true);
         } else {
             const timer = setTimeout(() => setIsVisible(false), 300);
@@ -18,15 +21,22 @@ export default function SecretModal() {
 
     if (!isVisible && !isModalOpen) return null;
 
+    const handleBackgroundClick = (e: React.MouseEvent) => {
+        // Prevent accidental closing on mobile immediately after opening
+        if (Date.now() - openTime.current < 400) return;
+        closeModal();
+    };
+
     const isSupernova = selectedSecret?.starType === 'supernova';
 
     return (
         <div
             className={`fixed inset-0 z-[110] flex items-center justify-center p-4 transition-opacity duration-300 ${isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            onPointerUp={(e) => e.stopPropagation()}
         >
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={closeModal}
+                onClick={handleBackgroundClick}
             />
 
             <div className={`
