@@ -1,7 +1,7 @@
 'use client';
 
 import { useGalaxyStore } from '@/store/useGalaxyStore';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function SecretModal() {
     const { selectedSecret, isModalOpen, closeModal } = useGalaxyStore();
