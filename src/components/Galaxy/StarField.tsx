@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef, useMemo, memo } from 'react';
+import { useRef, useMemo, memo, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useGalaxyStore, Secret } from '@/store/useGalaxyStore';
-import { Instances, Instance } from '@react-three/drei';
+
+const COLOR_WHITE = new THREE.Color('#ffffff');
 
 const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
     const mesh = useRef<THREE.Mesh>(null!);
@@ -15,11 +16,11 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
     useFrame((state, delta) => {
         if (!mesh.current) return;
         const t = state.clock.getElapsedTime();
-        const scale = (1 + Math.sin(t * 4 + secret.timestamp) * 0.4) * 2.5;
-        const currentScale = isSelected ? scale * 2.5 : scale;
-        mesh.current.scale.setScalar(currentScale);
+        const pulse = 1 + Math.sin(t * 4 + secret.timestamp) * 0.4;
+        const scale = (isSelected ? 3.0 : pulse) * 2.5;
+        mesh.current.scale.setScalar(scale);
         if (glowMesh.current) {
-            glowMesh.current.scale.setScalar(currentScale * 1.5);
+            glowMesh.current.scale.setScalar(scale * 1.5);
             glowMesh.current.rotation.z -= delta * 0.5;
         }
         mesh.current.rotation.x += delta * 0.3;
@@ -56,30 +57,7 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
     );
 });
 
-const MovingInstance = ({ secret, isSelected }: { secret: Secret; isSelected: boolean }) => {
-    const ref = useRef<any>(null!);
-
-    useFrame((state) => {
-        if (!ref.current) return;
-        const t = state.clock.getElapsedTime();
-        const pulse = 1 + Math.sin(t * 2 + secret.timestamp) * 0.2;
-        const scale = isSelected ? 2.5 : pulse;
-        ref.current.scale.setScalar(scale);
-    });
-
-    return (
-        <Instance
-            ref={ref}
-            position={new THREE.Vector3(...secret.position)}
-            color={isSelected ? '#ffffff' : secret.color}
-            onClick={(e: any) => {
-                e.stopPropagation();
-                // We use a custom event dispatch since Instance doesn't have native onClick sometimes depending on drei version
-                // But in modern drei it works.
-            }}
-        />
-    );
-};
+SupernovaStar.displayName = 'SupernovaStar';
 
 export default function StarField() {
     const secrets = useGalaxyStore((state) => state.secrets);
@@ -89,35 +67,66 @@ export default function StarField() {
     const standardStars = useMemo(() => secrets.filter(s => s.starType !== 'supernova'), [secrets]);
     const supernovas = useMemo(() => secrets.filter(s => s.starType === 'supernova'), [secrets]);
 
+    const meshRef = useRef<THREE.InstancedMesh>(null!);
+    const dummy = useMemo(() => new THREE.Object3D(), []);
+
+    // Color caching to avoid new THREE.Color allocations in frame loop
+    const colors = useMemo(() => standardStars.map(s => new THREE.Color(s.color)), [standardStars]);
+
+    useEffect(() => {
+        if (!meshRef.current) return;
+        standardStars.forEach((star, i) => {
+            dummy.position.set(...star.position);
+            dummy.scale.setScalar(1);
+            dummy.updateMatrix();
+            meshRef.current.setMatrixAt(i, dummy.matrix);
+            meshRef.current.setColorAt(i, colors[i]);
+        });
+        meshRef.current.instanceMatrix.needsUpdate = true;
+        if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
+    }, [standardStars, dummy, colors]);
+
+    useFrame((state) => {
+        if (!meshRef.current) return;
+        const t = state.clock.getElapsedTime();
+
+        for (let i = 0; i < standardStars.length; i++) {
+            const star = standardStars[i];
+            const isSelected = selectedId === star.id;
+
+            const pulse = 1 + Math.sin(t * 2 + star.timestamp) * 0.15;
+            const scale = isSelected ? 3.5 : pulse;
+
+            dummy.position.set(...star.position);
+            dummy.scale.setScalar(scale);
+            dummy.updateMatrix();
+            meshRef.current.setMatrixAt(i, dummy.matrix);
+
+            meshRef.current.setColorAt(i, isSelected ? COLOR_WHITE : colors[i]);
+        }
+        meshRef.current.instanceMatrix.needsUpdate = true;
+        if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
+    });
+
     return (
         <group>
-            {/* GPU Instanced Standard Stars - High Performance */}
-            <Instances range={standardStars.length}>
+            <instancedMesh
+                ref={meshRef}
+                args={[null as any, null as any, standardStars.length]}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (e.instanceId !== undefined) {
+                        selectSecret(standardStars[e.instanceId]);
+                    }
+                }}
+            >
                 <sphereGeometry args={[0.15, 8, 8]} />
-                <meshStandardMaterial emissiveIntensity={1.5} toneMapped={false} />
-                {standardStars.map((secret) => (
-                    <group key={secret.id} position={new THREE.Vector3(...secret.position)}>
-                        {/* Hidden hit box for interaction - simple sphere */}
-                        <mesh
-                            visible={false}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                selectSecret(secret);
-                            }}
-                        >
-                            <sphereGeometry args={[1.5, 4, 4]} />
-                        </mesh>
-                        <MovingInstance secret={secret} isSelected={selectedId === secret.id} />
-                    </group>
-                ))}
-            </Instances>
+                <meshStandardMaterial toneMapped={false} />
+            </instancedMesh>
 
-            {/* Individual Supernova Stars - High Quality */}
             {supernovas.map((secret) => (
                 <SupernovaStar key={secret.id} secret={secret} />
             ))}
         </group>
     );
 }
-
-SupernovaStar.displayName = 'SupernovaStar';

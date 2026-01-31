@@ -33,14 +33,15 @@ export default function SecretModal() {
         <div
             className={`fixed inset-0 z-[110] flex items-center justify-center p-4 transition-opacity duration-300 ${isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
             onPointerUp={(e) => e.stopPropagation()}
+            onClick={handleBackgroundClick}
         >
+            {/* Premium Glass Effect with solid fallback for mobile stability */}
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={handleBackgroundClick}
+                className={`absolute inset-0 bg-black/80 md:bg-black/60 md:backdrop-blur-sm border-t md:border border-white/10 md:rounded-2xl transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
             />
 
             <div className={`
-                relative bg-black/95 border p-6 md:p-10 rounded-[2.5rem] max-w-[90vw] md:max-w-lg w-full 
+                relative bg-black/95 border p-6 md:p-10 rounded-[2.5rem] max-w-[90vw] md:max-w-lg w-full
                 max-h-[80vh] flex flex-col
                 shadow-[0_0_80px_rgba(0,0,0,0.5)] transform transition-all duration-500
                 ${isSupernova ? 'border-yellow-500/50' : 'border-white/10'}

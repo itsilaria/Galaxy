@@ -64,6 +64,8 @@ const SceneContent = memo(() => {
 
     const { c1, c2 } = sparkleCount;
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
     return (
         <>
             <fog attach="fog" args={['#000000', 10, 100]} />
@@ -73,8 +75,12 @@ const SceneContent = memo(() => {
             <Suspense fallback={null}>
                 <WarpStars />
                 <Nebula />
-                <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" />
-                <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" />
+                {!isMobile && (
+                    <>
+                        <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" />
+                        <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" />
+                    </>
+                )}
                 <StarField />
                 <CameraController />
             </Suspense>

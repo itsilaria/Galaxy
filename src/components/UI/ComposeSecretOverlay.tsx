@@ -45,8 +45,10 @@ export default function ComposeSecretOverlay() {
     if (!isAddingSecret) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-fade-in">
-            <div className="w-full max-w-lg bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 md:backdrop-blur-2xl animate-fade-in">
+            <div
+                className="w-full max-w-lg bg-black/80 border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden"
+            >
                 <h2 className="text-3xl md:text-4xl font-black text-white mb-2 text-center tracking-tighter italic">
                     {t.modalTitle}
                 </h2>
