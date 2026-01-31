@@ -12,6 +12,15 @@ export const translations = {
         support: "Support the Galaxy",
         premiumTitle: "🌟 Become a Supernova",
         premiumDesc: "Make your star bigger and brighter forever.",
+        starType: "Star Type",
+        standardColor: "Standard",
+        supernova: "Supernova (Premium)",
+        selectColor: "Select Color",
+        colorGold: "Gold",
+        colorBlue: "Electric Blue",
+        colorPink: "Neon Pink",
+        colorGreen: "Emerald",
+        sendPremium: "Launch Supernova",
         footer: "Exo-Galaxy Project • Global Edition"
     },
     it: {
@@ -27,6 +36,15 @@ export const translations = {
         support: "Sostieni la Galassia",
         premiumTitle: "🌟 Diventa una Supernova",
         premiumDesc: "Rendi la tua stella più grande e luminosa per sempre.",
+        starType: "Tipo di Stella",
+        standardColor: "Standard",
+        supernova: "Supernova (Premium)",
+        selectColor: "Scegli il Colore",
+        colorGold: "Oro",
+        colorBlue: "Blu Elettrico",
+        colorPink: "Rosa Neon",
+        colorGreen: "Smeraldo",
+        sendPremium: "Lancia Supernova",
         footer: "Progetto Exo-Galaxy • Edizione Globale"
     },
     es: {

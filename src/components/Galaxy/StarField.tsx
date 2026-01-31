@@ -8,21 +8,31 @@ import { useGalaxyStore, Secret } from '@/store/useGalaxyStore';
 
 const Star = ({ secret }: { secret: Secret }) => {
     const mesh = useRef<THREE.Mesh>(null!);
+    const glowMesh = useRef<THREE.Mesh>(null!);
     const { selectSecret, selectedSecret } = useGalaxyStore();
 
     const isSelected = selectedSecret?.id === secret.id;
+    const isSupernova = secret.starType === 'supernova';
 
     useFrame((state, delta) => {
         // Gentle rotation
-        mesh.current.rotation.x += delta * 0.1;
-        mesh.current.rotation.y += delta * 0.15;
+        mesh.current.rotation.x += delta * (isSupernova ? 0.3 : 0.1);
+        mesh.current.rotation.y += delta * (isSupernova ? 0.4 : 0.15);
 
         // Pulsating effect
         const t = state.clock.getElapsedTime();
-        const scale = 1 + Math.sin(t * 2 + secret.timestamp) * 0.2; // Increased pulse
-        // Increased base scale and hover scale significantly
-        const currentScale = isSelected ? 2.5 : (hovered ? 2.0 : scale);
+        const freq = isSupernova ? 4 : 2;
+        const pulseAmt = isSupernova ? 0.4 : 0.2;
+        const scale = 1 + Math.sin(t * freq + secret.timestamp) * pulseAmt;
+
+        const baseSize = isSupernova ? 2.5 : 1.0;
+        const currentScale = isSelected ? baseSize * 2.5 : (hovered ? baseSize * 2.0 : scale * baseSize);
         mesh.current.scale.setScalar(currentScale);
+
+        if (isSupernova && glowMesh.current) {
+            glowMesh.current.scale.setScalar(currentScale * 1.5);
+            glowMesh.current.rotation.z -= delta * 0.5;
+        }
     });
 
     const [hovered, setHover] = useState(false);
@@ -50,8 +60,21 @@ const Star = ({ secret }: { secret: Secret }) => {
                     document.body.style.cursor = 'auto';
                 }}
             >
-                <sphereGeometry args={[1.5, 8, 8]} /> {/* Big hit area */}
+                <sphereGeometry args={[isSupernova ? 3 : 1.5, 8, 8]} />
             </mesh>
+
+            {/* Premium Glow Aura */}
+            {isSupernova && (
+                <mesh ref={glowMesh}>
+                    <ringGeometry args={[0.3, 0.4, 32]} />
+                    <meshBasicMaterial
+                        color={secret.color}
+                        transparent
+                        opacity={0.3}
+                        side={THREE.DoubleSide}
+                    />
+                </mesh>
+            )}
 
             {/* Visible Star */}
             <mesh ref={mesh}>
@@ -59,16 +82,17 @@ const Star = ({ secret }: { secret: Secret }) => {
                 <meshStandardMaterial
                     color={isSelected ? '#ffffff' : secret.color}
                     emissive={isSelected ? '#ffffff' : secret.color}
-                    emissiveIntensity={isSelected ? 3 : (hovered ? 2 : 0.8)}
+                    emissiveIntensity={isSelected ? 5 : (isSupernova ? 3.0 : (hovered ? 2 : 0.8))}
                     toneMapped={false}
                 />
             </mesh>
 
             {isSelected && (
                 <Html distanceFactor={10}>
-                    <div className="bg-black/90 text-white p-4 rounded-xl border border-white/30 w-64 text-sm backdrop-blur-xl shadow-[0_0_50px_rgba(255,255,255,0.2)] animate-fade-in">
-                        <p className="italic">"{secret.text}"</p>
-                        <div className="mt-2 text-[10px] text-white/40 uppercase tracking-widest flex justify-between">
+                    <div className={`bg-black/95 text-white p-6 rounded-3xl border ${isSupernova ? 'border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.3)]' : 'border-white/30'} w-72 text-sm backdrop-blur-2xl animate-fade-in`}>
+                        {isSupernova && <div className="text-[9px] font-black text-yellow-500 uppercase tracking-widest mb-2 flex items-center gap-1">✨ Supernova Secret</div>}
+                        <p className="italic text-lg leading-tight tracking-tight">"{secret.text}"</p>
+                        <div className="mt-4 text-[9px] text-white/30 uppercase tracking-[0.2em] flex justify-between font-bold">
                             <span>{secret.country}</span>
                             <span>{new Date(secret.timestamp).toLocaleDateString()}</span>
                         </div>

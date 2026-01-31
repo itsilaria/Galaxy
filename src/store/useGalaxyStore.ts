@@ -7,8 +7,11 @@ export interface Secret {
     position: [number, number, number];
     color: string;
     timestamp: number;
-    country: string; // e.g., 'IT', 'US', 'FR'
-    language: string; // e.g., 'it', 'en', 'fr'
+    country: string;
+    language: string;
+    isPremium?: boolean;
+    starType?: 'standard' | 'supernova';
+    glowColor?: string;
 }
 
 type SupportedLanguage = 'en' | 'it' | 'es' | 'fr' | 'de' | 'jp';
@@ -29,7 +32,7 @@ interface GalaxyState {
     closeModal: () => void;
     startAddingSecret: () => void;
     cancelAddingSecret: () => void;
-    addSecret: (text: string) => void;
+    addSecret: (text: string, isPremium?: boolean, starType?: 'standard' | 'supernova', glowColor?: string) => void;
 }
 
 // Mock data generator

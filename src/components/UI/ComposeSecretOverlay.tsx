@@ -6,60 +6,119 @@ import { useState } from 'react';
 
 export default function ComposeSecretOverlay() {
     const { isAddingSecret, cancelAddingSecret, addSecret, currentLanguage } = useGalaxyStore();
-    const t = translations[currentLanguage as keyof typeof translations];
+    const t = translations[currentLanguage as keyof typeof translations] as any;
     const [text, setText] = useState('');
+    const [starType, setStarType] = useState<'standard' | 'supernova'>('standard');
+    const [selectedColor, setSelectedColor] = useState('#ffd700'); // Gold as default premium
+
+    const premiumColors = [
+        { id: 'gold', color: '#ffd700', label: t.colorGold },
+        { id: 'blue', color: '#00ccff', label: t.colorBlue },
+        { id: 'pink', color: '#ff00aa', label: t.colorPink },
+        { id: 'green', color: '#00fca8', label: t.colorGreen },
+    ];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (text.trim()) {
-            addSecret(text);
+            addSecret(text, starType === 'supernova', starType, starType === 'supernova' ? selectedColor : undefined);
             setText('');
+            setStarType('standard');
         }
     };
 
     if (!isAddingSecret) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-            <div className="w-full max-w-md">
-                <h2 className="text-2xl font-bold text-white mb-2 text-center">{t.modalTitle}</h2>
-                <p className="text-center text-white/50 mb-4 text-sm">{t.composeSubtitle}</p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-fade-in">
+            <div className="w-full max-w-lg bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-2 text-center tracking-tighter italic">
+                    {t.modalTitle}
+                </h2>
+                <p className="text-center text-white/40 mb-8 text-xs uppercase tracking-[0.3em]">
+                    {t.composeSubtitle}
+                </p>
 
-                <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 mb-6 group cursor-pointer hover:border-purple-400/50 transition-all">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl animate-pulse">
-                            🌟
-                        </div>
-                        <div>
-                            <h4 className="text-white text-xs font-bold uppercase tracking-wider">{t.premiumTitle}</h4>
-                            <p className="text-white/40 text-[10px]">{t.premiumDesc}</p>
-                        </div>
-                    </div>
+                {/* Star Type Selection */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                    <button
+                        type="button"
+                        onClick={() => setStarType('standard')}
+                        className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-2 ${starType === 'standard'
+                            ? 'bg-white/10 border-white/40 ring-1 ring-white/20'
+                            : 'bg-black/20 border-white/5 opacity-50 hover:opacity-100'
+                            }`}
+                    >
+                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">✨</div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">{t.standardColor}</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setStarType('supernova')}
+                        className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-2 ${starType === 'supernova'
+                            ? 'bg-gradient-to-br from-yellow-500/20 to-purple-500/20 border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.2)]'
+                            : 'bg-black/20 border-white/5 opacity-50 hover:opacity-100'
+                            }`}
+                    >
+                        <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-xl animate-pulse">🌟</div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-yellow-500">{t.supernova}</span>
+                    </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        className="w-full h-40 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 focus:outline-none focus:border-white/40 resize-none transition-colors"
-                        placeholder={t.modalPlaceholder}
-                        autoFocus
-                    />
+                {starType === 'supernova' && (
+                    <div className="mb-8 animate-slide-up">
+                        <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest block mb-4 text-center">
+                            {t.selectColor}
+                        </label>
+                        <div className="flex justify-center gap-4">
+                            {premiumColors.map((pc) => (
+                                <button
+                                    key={pc.id}
+                                    type="button"
+                                    onClick={() => setSelectedColor(pc.color)}
+                                    className={`w-10 h-10 rounded-full transition-all border-2 flex items-center justify-center ${selectedColor === pc.color ? 'border-white scale-125' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                                    style={{ backgroundColor: pc.color }}
+                                    title={pc.label}
+                                >
+                                    {selectedColor === pc.color && <div className="w-2 h-2 rounded-full bg-white shadow-xl"></div>}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                    <div className="flex gap-3">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="relative group">
+                        <textarea
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                            className="w-full h-48 bg-white/5 border border-white/10 rounded-2xl p-6 text-white placeholder-white/10 focus:outline-none focus:border-white/30 resize-none transition-all text-lg italic tracking-tight"
+                            placeholder={t.modalPlaceholder}
+                            autoFocus
+                        />
+                        <div className="absolute bottom-4 right-4 text-[10px] font-mono text-white/20">
+                            {text.length} chars
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4">
                         <button
                             type="button"
                             onClick={cancelAddingSecret}
-                            className="flex-1 py-3 px-6 rounded-lg bg-transparent border border-white/10 text-white/70 hover:bg-white/5 transition-colors"
+                            className="flex-1 py-4 px-6 rounded-2xl bg-black/40 border border-white/5 text-white/40 hover:text-white/70 hover:bg-white/5 transition-all uppercase text-[10px] font-bold tracking-widest"
                         >
                             {t.cancel}
                         </button>
                         <button
                             type="submit"
                             disabled={!text.trim()}
-                            className="flex-1 py-3 px-6 rounded-lg bg-white text-black font-medium hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className={`flex-1 py-4 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-widest transition-all ${starType === 'supernova'
+                                ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black hover:scale-105 active:scale-95'
+                                : 'bg-white text-black hover:bg-white/90 active:scale-95'
+                                } disabled:opacity-30 disabled:cursor-not-allowed`}
                         >
-                            {t.send}
+                            {starType === 'supernova' ? t.sendPremium : t.send}
                         </button>
                     </div>
                 </form>
