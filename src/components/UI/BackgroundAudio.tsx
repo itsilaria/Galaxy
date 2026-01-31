@@ -25,31 +25,55 @@ export default function BackgroundAudio() {
                 gainNode.current.gain.setValueAtTime(0, audioContext.current.currentTime);
                 gainNode.current.connect(audioContext.current.destination);
 
-                // Create a richer drone with multiple oscillators
-                const frequencies = [110, 165, 220, 330];
-                frequencies.forEach((freq, i) => {
+                // Create a ethereal drone with pure sine waves
+                const baseFrequencies = [55, 110, 165, 220]; // A1, A2, E3, A3 (Lower and smoother)
+                baseFrequencies.forEach((freq, i) => {
                     const osc = audioContext.current!.createOscillator();
                     const localGain = audioContext.current!.createGain();
                     const filter = audioContext.current!.createBiquadFilter();
 
-                    osc.type = i % 2 === 0 ? 'triangle' : 'sine';
+                    osc.type = 'sine'; // Only sine for maximum tranquility
                     osc.frequency.setValueAtTime(freq, audioContext.current!.currentTime);
 
                     filter.type = 'lowpass';
-                    filter.frequency.setValueAtTime(800, audioContext.current!.currentTime);
+                    filter.frequency.setValueAtTime(400, audioContext.current!.currentTime);
 
-                    localGain.gain.setValueAtTime(0.12, audioContext.current!.currentTime); // Slightly louder
+                    localGain.gain.setValueAtTime(0.05, audioContext.current!.currentTime);
 
+                    // Very slow LFO for "breathing" effect
                     const lfo = audioContext.current!.createOscillator();
                     const lfoGain = audioContext.current!.createGain();
-                    lfo.frequency.setValueAtTime(0.05 + Math.random() * 0.1, audioContext.current!.currentTime);
-                    lfoGain.gain.setValueAtTime(1.5, audioContext.current!.currentTime);
+                    lfo.frequency.setValueAtTime(0.02 + Math.random() * 0.03, audioContext.current!.currentTime);
+                    lfoGain.gain.setValueAtTime(1.0, audioContext.current!.currentTime);
                     lfo.connect(lfoGain);
                     lfoGain.connect(osc.frequency);
                     lfo.start();
 
                     osc.connect(filter);
                     filter.connect(localGain);
+                    localGain.connect(gainNode.current!);
+                    osc.start();
+                    oscillators.current.push(osc);
+                });
+
+                // Add "Shimmer" high frequency faint oscillators for spatial depth
+                [440, 660, 880].forEach(freq => {
+                    const osc = audioContext.current!.createOscillator();
+                    const localGain = audioContext.current!.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioContext.current!.currentTime);
+                    localGain.gain.setValueAtTime(0, audioContext.current!.currentTime);
+
+                    // Slow volume surging
+                    const surge = audioContext.current!.createOscillator();
+                    const surgeGain = audioContext.current!.createGain();
+                    surge.frequency.setValueAtTime(0.01 + Math.random() * 0.01, audioContext.current!.currentTime);
+                    surgeGain.gain.setValueAtTime(0.02, audioContext.current!.currentTime);
+                    surge.connect(surgeGain);
+                    surgeGain.connect(localGain.gain);
+                    surge.start();
+
+                    osc.connect(localGain);
                     localGain.connect(gainNode.current!);
                     osc.start();
                     oscillators.current.push(osc);
