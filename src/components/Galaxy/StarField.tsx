@@ -36,20 +36,27 @@ const Star = ({ secret }: { secret: Secret }) => {
     });
 
     const [hovered, setHover] = useState(false);
+    const [energyLevel, setEnergyLevel] = useState(0);
+
+    useFrame((state, delta) => {
+        if (energyLevel > 0) {
+            setEnergyLevel(prev => Math.max(0, prev - delta * 2));
+        }
+    });
+
+    const handleStarClick = (e: any) => {
+        e.stopPropagation();
+        setEnergyLevel(2); // Temporary flash
+        selectSecret(secret);
+    };
 
     return (
         <group position={new THREE.Vector3(...secret.position)}>
             {/* Invisible larger hit box */}
             <mesh
                 visible={false}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    selectSecret(secret);
-                }}
-                onPointerDown={(e) => {
-                    e.stopPropagation();
-                    selectSecret(secret);
-                }}
+                onClick={handleStarClick}
+                onPointerDown={handleStarClick}
                 onPointerOver={(e) => {
                     e.stopPropagation();
                     setHover(true);
@@ -61,44 +68,42 @@ const Star = ({ secret }: { secret: Secret }) => {
                 }}
             >
                 <sphereGeometry args={[isSupernova ? 3 : 1.5, 8, 8]} />
-            </mesh>
+                {/* Premium Glow Aura */}
+                {isSupernova && (
+                    <mesh ref={glowMesh}>
+                        <ringGeometry args={[0.3, 0.4, 32]} />
+                        <meshBasicMaterial
+                            color={secret.color}
+                            transparent
+                            opacity={0.3}
+                            side={THREE.DoubleSide}
+                        />
+                    </mesh>
+                )}
 
-            {/* Premium Glow Aura */}
-            {isSupernova && (
-                <mesh ref={glowMesh}>
-                    <ringGeometry args={[0.3, 0.4, 32]} />
-                    <meshBasicMaterial
-                        color={secret.color}
-                        transparent
-                        opacity={0.3}
-                        side={THREE.DoubleSide}
+                {/* Visible Star */}
+                <mesh ref={mesh}>
+                    <sphereGeometry args={[0.2, 16, 16]} />
+                    <meshStandardMaterial
+                        color={isSelected ? '#ffffff' : secret.color}
+                        emissive={isSelected ? '#ffffff' : secret.color}
+                        emissiveIntensity={isSelected ? 5 : (isSupernova ? 4.0 + energyLevel : (hovered ? 2 + energyLevel : 0.8 + energyLevel))}
+                        toneMapped={false}
                     />
                 </mesh>
-            )}
 
-            {/* Visible Star */}
-            <mesh ref={mesh}>
-                <sphereGeometry args={[0.2, 16, 16]} />
-                <meshStandardMaterial
-                    color={isSelected ? '#ffffff' : secret.color}
-                    emissive={isSelected ? '#ffffff' : secret.color}
-                    emissiveIntensity={isSelected ? 5 : (isSupernova ? 3.0 : (hovered ? 2 : 0.8))}
-                    toneMapped={false}
-                />
-            </mesh>
-
-            {isSelected && (
-                <Html distanceFactor={10}>
-                    <div className={`bg-black/95 text-white p-6 rounded-3xl border ${isSupernova ? 'border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.3)]' : 'border-white/30'} w-72 text-sm backdrop-blur-2xl animate-fade-in`}>
-                        {isSupernova && <div className="text-[9px] font-black text-yellow-500 uppercase tracking-widest mb-2 flex items-center gap-1">✨ Supernova Secret</div>}
-                        <p className="italic text-lg leading-tight tracking-tight">"{secret.text}"</p>
-                        <div className="mt-4 text-[9px] text-white/30 uppercase tracking-[0.2em] flex justify-between font-bold">
-                            <span>{secret.country}</span>
-                            <span>{new Date(secret.timestamp).toLocaleDateString()}</span>
+                {isSelected && (
+                    <Html distanceFactor={10}>
+                        <div className={`bg-black/95 text-white p-6 rounded-3xl border ${isSupernova ? 'border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.3)]' : 'border-white/30'} w-72 text-sm backdrop-blur-2xl animate-fade-in`}>
+                            {isSupernova && <div className="text-[9px] font-black text-yellow-500 uppercase tracking-widest mb-2 flex items-center gap-1">✨ Supernova Secret</div>}
+                            <p className="italic text-lg leading-tight tracking-tight">"{secret.text}"</p>
+                            <div className="mt-4 text-[9px] text-white/30 uppercase tracking-[0.2em] flex justify-between font-bold">
+                                <span>{secret.country}</span>
+                                <span>{new Date(secret.timestamp).toLocaleDateString()}</span>
+                            </div>
                         </div>
-                    </div>
-                </Html>
-            )}
+                    </Html>
+                )}
         </group>
     );
 };

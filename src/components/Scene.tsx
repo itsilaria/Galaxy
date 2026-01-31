@@ -1,5 +1,5 @@
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
-import { Suspense, useRef, useState, useEffect } from 'react';
+import { Suspense, useRef, useState, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame, Canvas } from '@react-three/fiber';
 
@@ -40,7 +40,7 @@ const Nebula = () => {
 
     return (
         <group>
-            {points.map((pos, i) => (
+            {points.map((pos: THREE.Vector3, i: number) => (
                 <Sparkles
                     key={i}
                     position={pos}
