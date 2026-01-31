@@ -15,11 +15,26 @@ export default function BackgroundAudio() {
         if (isStarted && isMuted) {
             startAudio();
         }
+
+        return () => {
+            // Strict cleanup for mobile memory
+            oscillators.current.forEach(osc => {
+                try {
+                    osc.stop();
+                    osc.disconnect();
+                } catch (e) { }
+            });
+            oscillators.current = [];
+            if (audioContext.current && audioContext.current.state !== 'closed') {
+                audioContext.current.close().catch(console.error);
+                audioContext.current = null;
+            }
+        };
     }, [isStarted]);
 
     const startAudio = async () => {
         try {
-            if (!audioContext.current) {
+            if (!audioContext.current || audioContext.current.state === 'closed') {
                 audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
                 gainNode.current = audioContext.current.createGain();
                 gainNode.current.gain.setValueAtTime(0, audioContext.current.currentTime);
