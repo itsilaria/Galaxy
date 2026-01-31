@@ -96,7 +96,8 @@ export default function BackgroundAudio() {
     return (
         <button
             onClick={startAudio}
-            className="fixed bottom-8 left-8 z-[200] w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all backdrop-blur-md"
+            disabled={!isStarted}
+            className={`fixed bottom-8 left-8 z-[200] w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all backdrop-blur-md ${!isStarted ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             title={isMuted ? "Enable Sound" : "Mute Sound"}
         >
             {isMuted ? (

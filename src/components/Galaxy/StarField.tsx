@@ -108,18 +108,6 @@ const Star = ({ secret }: { secret: Secret }) => {
                 />
             </mesh>
 
-            {isSelected && (
-                <Html distanceFactor={10} style={{ pointerEvents: 'none' }}>
-                    <div className={`bg-black/95 text-white p-6 rounded-3xl border ${isSupernova ? 'border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.3)]' : 'border-white/30'} w-72 text-sm backdrop-blur-2xl animate-fade-in pointer-events-auto`}>
-                        {isSupernova && <div className="text-[9px] font-black text-yellow-500 uppercase tracking-widest mb-2 flex items-center gap-1">✨ Supernova Secret</div>}
-                        <p className="italic text-lg leading-tight tracking-tight">"{secret.text}"</p>
-                        <div className="mt-4 text-[9px] text-white/30 uppercase tracking-[0.2em] flex justify-between font-bold">
-                            <span>{secret.country}</span>
-                            <span>{new Date(secret.timestamp).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                </Html>
-            )}
         </group>
     );
 };

@@ -22,12 +22,12 @@ export default function CameraController() {
                 const offset = direction.clone().multiplyScalar(4);
                 const camTarget = starPos.clone().add(offset);
 
-                // Smoothly interpolate camera position
-                state.camera.position.lerp(camTarget, delta * 4);
-                controls.target.lerp(starPos, delta * 4);
+                // Smoothly interpolate camera position with a gentler curve
+                state.camera.position.lerp(camTarget, delta * 2.5); // Slower for tranquility
+                controls.target.lerp(starPos, delta * 2.5);
 
                 // Check if we are close enough to stop "locking"
-                if (state.camera.position.distanceTo(camTarget) < 0.1) {
+                if (state.camera.position.distanceTo(camTarget) < 0.05) {
                     lastSelectedId.current = selectedSecret.id;
                 }
             }
