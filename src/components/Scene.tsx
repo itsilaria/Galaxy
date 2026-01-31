@@ -23,6 +23,39 @@ const WarpStars = () => {
 };
 
 
+const Nebula = () => {
+    const points = useMemo(() => {
+        const p = [];
+        for (let i = 0; i < 50; i++) {
+            p.push(new THREE.Vector3(
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 100
+            ));
+        }
+        return p;
+    }, []);
+
+    const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa'];
+
+    return (
+        <group>
+            {points.map((pos, i) => (
+                <Sparkles
+                    key={i}
+                    position={pos}
+                    count={50}
+                    scale={20}
+                    size={6}
+                    speed={0.1}
+                    opacity={0.15}
+                    color={colors[i % colors.length]}
+                />
+            ))}
+        </group>
+    );
+};
+
 export default function Scene() {
     const [sparkleCount, setSparkleCount] = useState({ c1: 2000, c2: 1000 });
 
@@ -48,8 +81,8 @@ export default function Scene() {
 
                 <Suspense fallback={null}>
                     <WarpStars />
+                    <Nebula />
                     <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.5} color="#ffeebb" />
-
                     <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.8} color="#ffaaee" />
                     <StarField />
                     <CameraController />
