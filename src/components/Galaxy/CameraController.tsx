@@ -9,31 +9,35 @@ export default function CameraController() {
     const { camera, controls } = useThree() as any;
     const selectedSecret = useGalaxyStore((state) => state.selectedSecret);
     const isModalOpen = useGalaxyStore((state) => state.isModalOpen);
-
-    // Store original position to return to
-    const initialPos = useRef(new THREE.Vector3(0, 0, 30));
-    const targetPos = useRef(new THREE.Vector3(0, 0, 0));
+    const lastSelectedId = useRef<string | null>(null);
 
     useFrame((state, delta) => {
         if (!controls) return;
 
         if (selectedSecret && isModalOpen) {
-            // Fly to the star
-            // Calculate a position slightly offset from the star to look AT it
-            const starPos = new THREE.Vector3(...selectedSecret.position);
-            const direction = starPos.clone().normalize();
-            const offset = direction.clone().multiplyScalar(4); // Distance from star
-            const camTarget = starPos.clone().add(offset);
+            // Only auto-fly if it's a NEW selection
+            if (lastSelectedId.current !== selectedSecret.id) {
+                const starPos = new THREE.Vector3(...selectedSecret.position);
+                const direction = starPos.clone().normalize();
+                const offset = direction.clone().multiplyScalar(4);
+                const camTarget = starPos.clone().add(offset);
 
-            // Smoothly interpolate camera position
-            state.camera.position.lerp(camTarget, delta * 2);
+                // Smoothly interpolate camera position
+                state.camera.position.lerp(camTarget, delta * 4);
+                controls.target.lerp(starPos, delta * 4);
 
-            // Smoothly interpolate controls target (look at star)
-            controls.target.lerp(starPos, delta * 2);
+                // Check if we are close enough to stop "locking"
+                if (state.camera.position.distanceTo(camTarget) < 0.1) {
+                    lastSelectedId.current = selectedSecret.id;
+                }
+            }
         } else {
-            // Optional: drifting or return to center? 
-            // For now, let OrbitControls handle it, but maybe slight drift?
-            // Let's just update controls to ensure damping works
+            // Reset selection tracking when modal closes
+            if (lastSelectedId.current !== null) {
+                lastSelectedId.current = null;
+            }
+
+            // Allow manual OrbitControls movement
         }
 
         controls.update();

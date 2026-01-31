@@ -21,6 +21,10 @@ export default function ComposeSecretOverlay() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (text.trim()) {
+            if (starType === 'supernova') {
+                // Open Buy Me A Coffee in a new tab for payment
+                window.open('https://buymeacoffee.com/perunbro', '_blank');
+            }
             addSecret(text, starType === 'supernova', starType, starType === 'supernova' ? selectedColor : undefined);
             setText('');
             setStarType('standard');
