@@ -16,27 +16,33 @@ export default function BackgroundAudio() {
             gainNode.current.gain.setValueAtTime(0, audioContext.current.currentTime);
             gainNode.current.connect(audioContext.current.destination);
 
-            // Create a deep drone with multiple oscillators
-            const frequencies = [40, 60, 80, 120];
-            frequencies.forEach((freq) => {
+            // Create a richer drone with multiple oscillators
+            const frequencies = [110, 165, 220, 330]; // More audible range (A2, E3, A3, E4)
+            frequencies.forEach((freq, i) => {
                 const osc = audioContext.current!.createOscillator();
                 const localGain = audioContext.current!.createGain();
+                const filter = audioContext.current!.createBiquadFilter();
 
-                osc.type = 'sine';
+                osc.type = i % 2 === 0 ? 'triangle' : 'sine'; // Tighter harmonics
                 osc.frequency.setValueAtTime(freq, audioContext.current!.currentTime);
 
-                localGain.gain.setValueAtTime(0.05, audioContext.current!.currentTime);
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, audioContext.current!.currentTime);
+                filter.Q.setValueAtTime(1, audioContext.current!.currentTime);
 
-                // Add some LFO for movement
+                localGain.gain.setValueAtTime(0.08, audioContext.current!.currentTime);
+
+                // Add LFO for movement
                 const lfo = audioContext.current!.createOscillator();
                 const lfoGain = audioContext.current!.createGain();
-                lfo.frequency.setValueAtTime(0.1 + Math.random() * 0.1, audioContext.current!.currentTime);
-                lfoGain.gain.setValueAtTime(2, audioContext.current!.currentTime);
+                lfo.frequency.setValueAtTime(0.05 + Math.random() * 0.1, audioContext.current!.currentTime);
+                lfoGain.gain.setValueAtTime(1.5, audioContext.current!.currentTime);
                 lfo.connect(lfoGain);
                 lfoGain.connect(osc.frequency);
                 lfo.start();
 
-                osc.connect(localGain);
+                osc.connect(filter);
+                filter.connect(localGain);
                 localGain.connect(gainNode.current!);
                 osc.start();
                 oscillators.current.push(osc);
@@ -47,7 +53,10 @@ export default function BackgroundAudio() {
             audioContext.current.resume();
         }
 
-        const targetGain = isMuted ? 0.3 : 0;
+        const targetGain = isMuted ? 0.6 : 0; // Increased from 0.3 to 0.6
+        console.log('Audio Context State:', audioContext.current.state);
+        console.log('Target Gain:', targetGain);
+
         gainNode.current!.gain.exponentialRampToValueAtTime(targetGain + 0.001, audioContext.current.currentTime + 2);
         setIsMuted(!isMuted);
     };
