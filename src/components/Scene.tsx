@@ -1,5 +1,5 @@
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
-import { Suspense, useRef, useState, useEffect, useMemo } from 'react';
+import { Suspense, useRef, useState, useEffect, useMemo, memo } from 'react';
 import * as THREE from 'three';
 import { useFrame, Canvas } from '@react-three/fiber';
 
@@ -7,46 +7,49 @@ import StarField from './Galaxy/StarField';
 import CameraController from './Galaxy/CameraController';
 import { useGalaxyStore } from '@/store/useGalaxyStore';
 
-const WarpStars = () => {
+const WarpStars = memo(() => {
     const isWarping = useGalaxyStore(s => s.isWarping);
     const starRef = useRef<any>(null);
 
     useFrame((state, delta) => {
         if (starRef.current) {
-            // Lerp speed: if warping, go fast (20), else slow (1)
             const targetSpeed = isWarping ? 50 : 0.5;
             starRef.current.speed = THREE.MathUtils.lerp(starRef.current.speed || 1, targetSpeed, delta * 2);
         }
     });
 
-    return <Stars ref={starRef} radius={100} depth={50} count={5000} factor={4} saturation={0} fade />;
-};
+    return <Stars ref={starRef} radius={100} depth={50} count={3000} factor={4} saturation={0} fade />;
+});
 
-
-const Nebula = () => {
+const Nebula = memo(() => {
     const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa', '#33ffaa'];
+
+    const positions = useMemo(() => colors.map(() => new THREE.Vector3(
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 60
+    )), []);
 
     return (
         <group>
             {colors.map((color, i) => (
                 <Sparkles
                     key={i}
-                    position={new THREE.Vector3(
-                        (Math.random() - 0.5) * 60,
-                        (Math.random() - 0.5) * 60,
-                        (Math.random() - 0.5) * 60
-                    )}
-                    count={200}
+                    position={positions[i]}
+                    count={150}
                     scale={40}
                     size={6}
                     speed={0.1}
-                    opacity={0.1}
+                    opacity={0.08}
                     color={color}
                 />
             ))}
         </group>
     );
-};
+});
+
+WarpStars.displayName = 'WarpStars';
+Nebula.displayName = 'Nebula';
 
 export default function Scene() {
     const [sparkleCount, setSparkleCount] = useState({ c1: 2000, c2: 1000 });
