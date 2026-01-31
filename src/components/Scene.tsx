@@ -51,7 +51,8 @@ const Nebula = memo(() => {
 WarpStars.displayName = 'WarpStars';
 Nebula.displayName = 'Nebula';
 
-export default function Scene() {
+const SceneContent = memo(() => {
+    const isModalOpen = useGalaxyStore(s => s.isModalOpen);
     const [sparkleCount, setSparkleCount] = useState({ c1: 2000, c2: 1000 });
 
     useEffect(() => {
@@ -61,40 +62,55 @@ export default function Scene() {
         }
     }, []);
 
-    const isModalOpen = useGalaxyStore(s => s.isModalOpen);
     const { c1, c2 } = sparkleCount;
 
+    return (
+        <>
+            <fog attach="fog" args={['#000000', 10, 100]} />
+            <ambientLight intensity={0.2} />
+            <pointLight position={[10, 10, 10]} intensity={1} />
+
+            <Suspense fallback={null}>
+                <WarpStars />
+                <Nebula />
+                <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" />
+                <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" />
+                <StarField />
+                <CameraController />
+            </Suspense>
+
+            <OrbitControls
+                enablePan={false}
+                enableZoom={true}
+                minDistance={5}
+                maxDistance={80}
+                autoRotate={!isModalOpen}
+                autoRotateSpeed={0.5}
+                makeDefault
+                enableDamping={true}
+                dampingFactor={0.05}
+            />
+        </>
+    );
+});
+
+SceneContent.displayName = 'SceneContent';
+
+export default function Scene() {
     return (
         <div className="w-full h-full bg-black">
             <Canvas
                 camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={[1, 2]}
-                gl={{ antialias: true, alpha: false }}
+                dpr={[1, 1.5]}
+                gl={{
+                    antialias: false,
+                    alpha: false,
+                    powerPreference: "high-performance",
+                    stencil: false,
+                    depth: true
+                }}
             >
-                <fog attach="fog" args={['#000000', 10, 100]} />
-                <ambientLight intensity={0.2} />
-                <pointLight position={[10, 10, 10]} intensity={1} />
-
-                <Suspense fallback={null}>
-                    <WarpStars />
-                    <Nebula />
-                    <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.5} color="#ffeebb" />
-                    <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.8} color="#ffaaee" />
-                    <StarField />
-                    <CameraController />
-                </Suspense>
-
-                <OrbitControls
-                    enablePan={false}
-                    enableZoom={true}
-                    minDistance={5}
-                    maxDistance={80}
-                    autoRotate={!isModalOpen}
-                    autoRotateSpeed={0.5}
-                    makeDefault
-                    enableDamping={true}
-                    dampingFactor={0.05}
-                />
+                <SceneContent />
             </Canvas>
         </div>
     );
