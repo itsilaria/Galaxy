@@ -2,7 +2,7 @@
 
 import { useGalaxyStore } from '@/store/useGalaxyStore';
 import { translations } from '@/utils/translations';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { containsProfanity } from '@/utils/profanityFilter';
 
 export default function ComposeSecretOverlay() {
