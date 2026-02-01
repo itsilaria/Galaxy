@@ -26,6 +26,7 @@ interface GalaxyState {
     currentLanguage: SupportedLanguage;
     isWarping: boolean;
     isStarted: boolean;
+    _hasHydrated: boolean;
 
     // Actions
     setLanguage: (lang: SupportedLanguage) => void;
@@ -36,6 +37,7 @@ interface GalaxyState {
     cancelAddingSecret: () => void;
     addSecret: (text: string, isPremium?: boolean, starType?: 'standard' | 'supernova', glowColor?: string) => void;
     startGalaxy: () => void;
+    setHasHydrated: (state: boolean) => void;
 }
 
 // Mock data generator - Deterministic for hydration stability
@@ -43,7 +45,7 @@ const generateMockSecrets = (count: number, lang: SupportedLanguage): Secret[] =
     const secrets: Secret[] = [];
     const colors = ['#ffddcc', '#ccddff', '#ffccdd', '#ddffcc', '#ffffff'];
 
-    let seed = 42; // Fixed seed for mock stars
+    let seed = 42;
     const pseudoRandom = () => {
         seed = (seed * 16807) % 2147483647;
         return (seed - 1) / 2147483646;
@@ -53,7 +55,7 @@ const generateMockSecrets = (count: number, lang: SupportedLanguage): Secret[] =
         en: ["I haven't told my parents I lost my job.", "I'm in love with my best friend.", "I want to move to Mars.", "I stole a balloon when I was 5.", "Sometimes I just want to disappear.", "I'm afraid of the dark."],
         it: ["Non ho detto ai miei che ho perso il lavoro.", "Sono innamorato della mia migliore amica.", "Voglio trasferirmi su Marte.", "Ho rubato un palloncino a 5 anni.", "A volte vorrei solo sparire.", "Ho paura del buio.", "La pizza con l'ananas mi piace.", "Odio il mio capo ma sorrido sempre."],
         es: ["No le he dicho a mis padres que perdí mi trabajo.", "Estoy enamorado de mi mejor amigo.", "Quiero mudarme a Marte.", "Robé un globo cuando tenía 5 años.", "A veces solo quiero desaparecer.", "Tengo miedo a la oscuridad."],
-        fr: ["Je n'ai pas dit à mes parents que j'ai perdu mon emploi.", "Je suis amoureux de mon meilleur ami.", "Je veux déménager sur Mars.", "J'ai volé un ballon quand j'ai 5 ans.", "Parfois, je veux juste disparaître.", "J'ai peur du noir."],
+        fr: ["Je n'ai pas dit à mes parents que j'ai perdu mon emploi.", "Je suis amoureux de mon meilleur ami.", "Je veux déménager sur Mars.", "J'ai volé un ballon quand j'avais 5 ans.", "Parfois, je veux juste disparaître.", "J'ai peur du noir."],
         de: ["Ich habe meinen Eltern nicht gesagt, dass ich meinen Job verloren habe.", "Ich bin in meinen besten Freund verliebt.", "Ich möchte zum Mars ziehen.", "Ich habe als Kind einen Ballon gestohlen.", "Manchmal möchte ich einfach verschwinden.", "Ich habe Angst im Dunkeln."],
         jp: ["両親に仕事を失ったことを言っていません。", "親友に恋しています。", "火星に移住したいです。", "5歳の時に風船を盗みました。", "時々消えてしまいたいと思います。", "暗闇が怖いです。"]
     };
@@ -74,7 +76,7 @@ const generateMockSecrets = (count: number, lang: SupportedLanguage): Secret[] =
             text: pool[Math.floor(pseudoRandom() * pool.length)],
             position: [x, y, z],
             color: colors[Math.floor(pseudoRandom() * colors.length)],
-            timestamp: 1640995200000 + i * 10000, // Fixed historical time
+            timestamp: 1640995200000 + i * 10000,
             language: lang,
             country: lang.toUpperCase(),
         });
@@ -93,7 +95,9 @@ export const useGalaxyStore = create<GalaxyState>()(
             currentLanguage: 'en',
             isWarping: false,
             isStarted: false,
+            _hasHydrated: false,
 
+            setHasHydrated: (state) => set({ _hasHydrated: state }),
             setLanguage: (lang) => {
                 set({ isWarping: true });
                 setTimeout(() => {
@@ -131,6 +135,9 @@ export const useGalaxyStore = create<GalaxyState>()(
         }),
         {
             name: 'galaxy-secrets-storage',
+            onRehydrateStorage: () => (state) => {
+                state?.setHasHydrated(true);
+            },
             partialize: (state) => ({ secrets: state.secrets }),
         }
     )

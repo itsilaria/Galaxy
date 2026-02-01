@@ -29,15 +29,19 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
 
     return (
         <group position={new THREE.Vector3(...secret.position)}>
-            {/* Collision mesh */}
+            {/* 
+                CRITICAL FIX: visible={false} prevents raycasting.
+                Use transparent/opacity: 0 instead.
+                Increased hit radius for better mobile experience.
+            */}
             <mesh
                 onPointerUp={(e) => {
                     e.stopPropagation();
                     selectSecret(secret);
                 }}
             >
-                <sphereGeometry args={[1.5, 8, 8]} />
-                <meshBasicMaterial visible={false} />
+                <sphereGeometry args={[2.0, 8, 8]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
 
             <mesh ref={glowMesh} raycast={() => null}>
@@ -73,7 +77,6 @@ export default function StarField() {
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const colors = useMemo(() => standardStars.map(s => new THREE.Color(s.color)), [standardStars]);
 
-    // Initialize positions
     useEffect(() => {
         if (!visualMeshRef.current || !hitMeshRef.current) return;
         standardStars.forEach((star, i) => {
@@ -98,7 +101,7 @@ export default function StarField() {
             const isSelected = selectedId === star.id;
 
             const pulse = 1 + Math.sin(t * 2 + star.timestamp) * 0.15;
-            const scale = isSelected ? 3.5 : pulse;
+            const scale = (isSelected ? 3.5 : pulse);
 
             dummy.position.set(...star.position);
             dummy.scale.setScalar(scale);
@@ -115,7 +118,7 @@ export default function StarField() {
 
     return (
         <group>
-            {/* 1. INTERACTION LAYER - LARGE INVISIBLE SPHERES */}
+            {/* INTERACTION LAYER - LARGE TRANSPARENT SPHERES (OPACITY 0) */}
             <instancedMesh
                 ref={hitMeshRef}
                 args={[null as any, null as any, standardStars.length]}
@@ -126,11 +129,11 @@ export default function StarField() {
                     }
                 }}
             >
-                <sphereGeometry args={[1.2, 6, 6]} />
-                <meshBasicMaterial visible={false} />
+                <sphereGeometry args={[1.5, 6, 6]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </instancedMesh>
 
-            {/* 2. VISUAL LAYER - SMALL GLOWING SPHERES */}
+            {/* VISUAL LAYER - RENDER ONLY */}
             <instancedMesh
                 ref={visualMeshRef}
                 args={[null as any, null as any, standardStars.length]}

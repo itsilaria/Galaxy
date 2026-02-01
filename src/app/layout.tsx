@@ -42,6 +42,8 @@ export const metadata: Metadata = {
   },
 };
 
+import ErrorBoundary from "@/components/UI/ErrorBoundary";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,8 +54,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   );
 }
+
