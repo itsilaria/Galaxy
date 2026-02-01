@@ -29,15 +29,15 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
 
     return (
         <group position={new THREE.Vector3(...secret.position)}>
-            {/* Larger invincible hit area for supernovas */}
+            {/* Collision mesh */}
             <mesh
-                visible={false}
                 onPointerUp={(e) => {
                     e.stopPropagation();
                     selectSecret(secret);
                 }}
             >
-                <sphereGeometry args={[1, 8, 8]} />
+                <sphereGeometry args={[1.5, 8, 8]} />
+                <meshBasicMaterial visible={false} />
             </mesh>
 
             <mesh ref={glowMesh} raycast={() => null}>
@@ -68,25 +68,29 @@ export default function StarField() {
     const standardStars = useMemo(() => secrets.filter(s => s.starType !== 'supernova'), [secrets]);
     const supernovas = useMemo(() => secrets.filter(s => s.starType === 'supernova'), [secrets]);
 
-    const meshRef = useRef<THREE.InstancedMesh>(null!);
+    const hitMeshRef = useRef<THREE.InstancedMesh>(null!);
+    const visualMeshRef = useRef<THREE.InstancedMesh>(null!);
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const colors = useMemo(() => standardStars.map(s => new THREE.Color(s.color)), [standardStars]);
 
+    // Initialize positions
     useEffect(() => {
-        if (!meshRef.current) return;
+        if (!visualMeshRef.current || !hitMeshRef.current) return;
         standardStars.forEach((star, i) => {
             dummy.position.set(...star.position);
             dummy.scale.setScalar(1);
             dummy.updateMatrix();
-            meshRef.current.setMatrixAt(i, dummy.matrix);
-            meshRef.current.setColorAt(i, colors[i]);
+            visualMeshRef.current.setMatrixAt(i, dummy.matrix);
+            hitMeshRef.current.setMatrixAt(i, dummy.matrix);
+            visualMeshRef.current.setColorAt(i, colors[i]);
         });
-        meshRef.current.instanceMatrix.needsUpdate = true;
-        if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
+        visualMeshRef.current.instanceMatrix.needsUpdate = true;
+        hitMeshRef.current.instanceMatrix.needsUpdate = true;
+        if (visualMeshRef.current.instanceColor) visualMeshRef.current.instanceColor.needsUpdate = true;
     }, [standardStars, colors, dummy]);
 
     useFrame((state) => {
-        if (!meshRef.current) return;
+        if (!visualMeshRef.current || !hitMeshRef.current) return;
         const t = state.clock.getElapsedTime();
 
         for (let i = 0; i < standardStars.length; i++) {
@@ -99,18 +103,21 @@ export default function StarField() {
             dummy.position.set(...star.position);
             dummy.scale.setScalar(scale);
             dummy.updateMatrix();
-            meshRef.current.setMatrixAt(i, dummy.matrix);
+            visualMeshRef.current.setMatrixAt(i, dummy.matrix);
+            hitMeshRef.current.setMatrixAt(i, dummy.matrix);
 
-            meshRef.current.setColorAt(i, isSelected ? COLOR_WHITE : colors[i]);
+            visualMeshRef.current.setColorAt(i, isSelected ? COLOR_WHITE : colors[i]);
         }
-        meshRef.current.instanceMatrix.needsUpdate = true;
-        if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
+        visualMeshRef.current.instanceMatrix.needsUpdate = true;
+        hitMeshRef.current.instanceMatrix.needsUpdate = true;
+        if (visualMeshRef.current.instanceColor) visualMeshRef.current.instanceColor.needsUpdate = true;
     });
 
     return (
         <group>
-            {/* Hit area layer (invisible larger spheres) */}
+            {/* 1. INTERACTION LAYER - LARGE INVISIBLE SPHERES */}
             <instancedMesh
+                ref={hitMeshRef}
                 args={[null as any, null as any, standardStars.length]}
                 onPointerUp={(e) => {
                     e.stopPropagation();
@@ -119,17 +126,17 @@ export default function StarField() {
                     }
                 }}
             >
-                <sphereGeometry args={[0.6, 6, 6]} />
+                <sphereGeometry args={[1.2, 6, 6]} />
                 <meshBasicMaterial visible={false} />
             </instancedMesh>
 
-            {/* Visual layer (no raycasting for performance and overlap safety) */}
+            {/* 2. VISUAL LAYER - SMALL GLOWING SPHERES */}
             <instancedMesh
-                ref={meshRef}
+                ref={visualMeshRef}
                 args={[null as any, null as any, standardStars.length]}
                 raycast={() => null}
             >
-                <sphereGeometry args={[0.15, 8, 8]} />
+                <sphereGeometry args={[0.2, 8, 8]} />
                 <meshStandardMaterial toneMapped={false} />
             </instancedMesh>
 
