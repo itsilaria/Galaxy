@@ -29,32 +29,32 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
 
     return (
         <group position={new THREE.Vector3(...secret.position)}>
-            {/* 
-                CRITICAL FIX: visible={false} prevents raycasting.
-                Use transparent/opacity: 0 instead.
-                Increased hit radius for better mobile experience.
-            */}
+            {/* Large clickable area */}
             <mesh
-                onPointerUp={(e) => {
+                onClick={(e) => {
+                    e.stopPropagation();
+                    selectSecret(secret);
+                }}
+                onPointerDown={(e) => {
                     e.stopPropagation();
                     selectSecret(secret);
                 }}
             >
-                <sphereGeometry args={[2.0, 8, 8]} />
+                <sphereGeometry args={[3, 16, 16]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
 
-            <mesh ref={glowMesh} raycast={() => null}>
-                <ringGeometry args={[0.3, 0.4, 32]} />
-                <meshBasicMaterial color={secret.color} transparent opacity={0.3} side={THREE.DoubleSide} />
+            <mesh ref={glowMesh}>
+                <ringGeometry args={[0.5, 0.7, 32]} />
+                <meshBasicMaterial color={secret.color} transparent opacity={0.4} side={THREE.DoubleSide} />
             </mesh>
 
-            <mesh ref={mesh} raycast={() => null}>
-                <sphereGeometry args={[0.2, 16, 16]} />
+            <mesh ref={mesh}>
+                <sphereGeometry args={[0.4, 16, 16]} />
                 <meshStandardMaterial
                     color={isSelected ? '#ffffff' : secret.color}
                     emissive={isSelected ? '#ffffff' : secret.color}
-                    emissiveIntensity={isSelected ? 5 : 4.0}
+                    emissiveIntensity={isSelected ? 6 : 5.0}
                     toneMapped={false}
                 />
             </mesh>
@@ -100,8 +100,8 @@ export default function StarField() {
             const star = standardStars[i];
             const isSelected = selectedId === star.id;
 
-            const pulse = 1 + Math.sin(t * 2 + star.timestamp) * 0.15;
-            const scale = (isSelected ? 3.5 : pulse);
+            const pulse = 1 + Math.sin(t * 2 + star.timestamp) * 0.2;
+            const scale = (isSelected ? 4.0 : pulse);
 
             dummy.position.set(...star.position);
             dummy.scale.setScalar(scale);
@@ -118,29 +118,37 @@ export default function StarField() {
 
     return (
         <group>
-            {/* INTERACTION LAYER - LARGE TRANSPARENT SPHERES (OPACITY 0) */}
+            {/* INTERACTION LAYER - VERY LARGE TRANSPARENT SPHERES */}
             <instancedMesh
                 ref={hitMeshRef}
                 args={[null as any, null as any, standardStars.length]}
-                onPointerUp={(e) => {
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (e.instanceId !== undefined) {
+                        selectSecret(standardStars[e.instanceId]);
+                    }
+                }}
+                onPointerDown={(e) => {
                     e.stopPropagation();
                     if (e.instanceId !== undefined) {
                         selectSecret(standardStars[e.instanceId]);
                     }
                 }}
             >
-                <sphereGeometry args={[1.5, 6, 6]} />
+                <sphereGeometry args={[2.5, 8, 8]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </instancedMesh>
 
-            {/* VISUAL LAYER - RENDER ONLY */}
+            {/* VISUAL LAYER - LARGER GLOWING SPHERES */}
             <instancedMesh
                 ref={visualMeshRef}
                 args={[null as any, null as any, standardStars.length]}
-                raycast={() => null}
             >
-                <sphereGeometry args={[0.2, 8, 8]} />
-                <meshStandardMaterial toneMapped={false} />
+                <sphereGeometry args={[0.35, 12, 12]} />
+                <meshStandardMaterial
+                    toneMapped={false}
+                    emissiveIntensity={2.5}
+                />
             </instancedMesh>
 
             {supernovas.map((secret) => (
