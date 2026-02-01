@@ -13,6 +13,9 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
     const selectSecret = useGalaxyStore(s => s.selectSecret);
     const isSelected = useGalaxyStore(s => s.selectedSecret?.id === secret.id);
 
+    // Pre-allocate position vector to avoid allocations in useFrame
+    const positionVec = useMemo(() => new THREE.Vector3(...secret.position), [secret.position]);
+
     useFrame((state, delta) => {
         if (!mesh.current) return;
         const t = state.clock.getElapsedTime();
@@ -28,7 +31,7 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
     });
 
     return (
-        <group position={new THREE.Vector3(...secret.position)}>
+        <group position={positionVec}>
             {/* Large clickable area */}
             <mesh
                 onClick={(e) => {
@@ -139,15 +142,16 @@ export default function StarField() {
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </instancedMesh>
 
-            {/* VISUAL LAYER - LARGER GLOWING SPHERES */}
+            {/* VISUAL LAYER - BRIGHT GLOWING SPHERES */}
             <instancedMesh
                 ref={visualMeshRef}
                 args={[null as any, null as any, standardStars.length]}
             >
-                <sphereGeometry args={[0.35, 12, 12]} />
+                <sphereGeometry args={[0.5, 12, 12]} />
                 <meshStandardMaterial
                     toneMapped={false}
-                    emissiveIntensity={2.5}
+                    emissive="#ffffff"
+                    emissiveIntensity={3.5}
                 />
             </instancedMesh>
 
