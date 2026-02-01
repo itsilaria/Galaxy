@@ -18,7 +18,11 @@ const WarpStars = memo(() => {
         }
     });
 
-    return <Stars ref={starRef} radius={100} depth={50} count={3000} factor={4} saturation={0} fade />;
+    return (
+        <group raycast={() => null}>
+            <Stars ref={starRef} radius={100} depth={50} count={3000} factor={4} saturation={0} fade />
+        </group>
+    );
 });
 
 const Nebula = memo(() => {
@@ -31,7 +35,7 @@ const Nebula = memo(() => {
     )), []);
 
     return (
-        <group>
+        <group raycast={() => null}>
             {colors.map((color, i) => (
                 <Sparkles
                     key={i}
@@ -42,6 +46,7 @@ const Nebula = memo(() => {
                     speed={0.1}
                     opacity={0.08}
                     color={color}
+                    raycast={() => null}
                 />
             ))}
         </group>
@@ -63,7 +68,6 @@ const SceneContent = memo(() => {
     }, []);
 
     const { c1, c2 } = sparkleCount;
-
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     return (
@@ -77,8 +81,8 @@ const SceneContent = memo(() => {
                 <Nebula />
                 {!isMobile && (
                     <>
-                        <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" />
-                        <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" />
+                        <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
+                        <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
                     </>
                 )}
                 <StarField />
@@ -107,13 +111,14 @@ export default function Scene() {
         <div className="w-full h-full bg-black">
             <Canvas
                 camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={[1, 1.5]}
+                dpr={[1, 1]}
                 gl={{
                     antialias: false,
                     alpha: false,
                     powerPreference: "high-performance",
                     stencil: false,
-                    depth: true
+                    depth: true,
+                    precision: 'lowp'
                 }}
             >
                 <SceneContent />

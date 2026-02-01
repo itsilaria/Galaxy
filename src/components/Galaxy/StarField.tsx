@@ -29,22 +29,23 @@ const SupernovaStar = memo(({ secret }: { secret: Secret }) => {
 
     return (
         <group position={new THREE.Vector3(...secret.position)}>
+            {/* Larger invincible hit area for supernovas */}
             <mesh
                 visible={false}
-                onClick={(e) => {
+                onPointerUp={(e) => {
                     e.stopPropagation();
                     selectSecret(secret);
                 }}
             >
-                <sphereGeometry args={[4, 8, 8]} />
+                <sphereGeometry args={[1, 8, 8]} />
             </mesh>
 
-            <mesh ref={glowMesh}>
+            <mesh ref={glowMesh} raycast={() => null}>
                 <ringGeometry args={[0.3, 0.4, 32]} />
                 <meshBasicMaterial color={secret.color} transparent opacity={0.3} side={THREE.DoubleSide} />
             </mesh>
 
-            <mesh ref={mesh}>
+            <mesh ref={mesh} raycast={() => null}>
                 <sphereGeometry args={[0.2, 16, 16]} />
                 <meshStandardMaterial
                     color={isSelected ? '#ffffff' : secret.color}
@@ -108,15 +109,25 @@ export default function StarField() {
 
     return (
         <group>
+            {/* Hit area layer (invisible larger spheres) */}
             <instancedMesh
-                ref={meshRef}
                 args={[null as any, null as any, standardStars.length]}
-                onClick={(e) => {
+                onPointerUp={(e) => {
                     e.stopPropagation();
                     if (e.instanceId !== undefined) {
                         selectSecret(standardStars[e.instanceId]);
                     }
                 }}
+            >
+                <sphereGeometry args={[0.6, 6, 6]} />
+                <meshBasicMaterial visible={false} />
+            </instancedMesh>
+
+            {/* Visual layer (no raycasting for performance and overlap safety) */}
+            <instancedMesh
+                ref={meshRef}
+                args={[null as any, null as any, standardStars.length]}
+                raycast={() => null}
             >
                 <sphereGeometry args={[0.15, 8, 8]} />
                 <meshStandardMaterial toneMapped={false} />
