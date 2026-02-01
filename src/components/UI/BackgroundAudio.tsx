@@ -1,23 +1,79 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useGalaxyStore } from '@/store/useGalaxyStore';
 
 export default function BackgroundAudio() {
     const { isStarted } = useGalaxyStore();
 
     const [isMuted, setIsMuted] = useState(true);
+    const [isInitialized, setIsInitialized] = useState(false);
     const audioContext = useRef<AudioContext | null>(null);
     const oscillators = useRef<OscillatorNode[]>([]);
     const gainNode = useRef<GainNode | null>(null);
 
-    useEffect(() => {
-        if (isStarted && isMuted) {
-            startAudio();
-        }
+    const startAudio = useCallback(async () => {
+        try {
+            if (!isInitialized) {
+                if (!audioContext.current || audioContext.current.state === 'closed') {
+                    audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+                    gainNode.current = audioContext.current.createGain();
+                    gainNode.current.gain.setValueAtTime(0, audioContext.current.currentTime);
+                    gainNode.current.connect(audioContext.current.destination);
 
+                    const baseFrequencies = [55, 110];
+                    baseFrequencies.forEach((freq) => {
+                        const osc = audioContext.current!.createOscillator();
+                        const localGain = audioContext.current!.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, audioContext.current!.currentTime);
+                        localGain.gain.setValueAtTime(0.06, audioContext.current!.currentTime);
+
+                        const lfo = audioContext.current!.createOscillator();
+                        const lfoGain = audioContext.current!.createGain();
+                        lfo.frequency.setValueAtTime(0.02, audioContext.current!.currentTime);
+                        lfoGain.gain.setValueAtTime(0.5, audioContext.current!.currentTime);
+
+                        lfo.connect(lfoGain);
+                        lfoGain.connect(osc.frequency);
+                        lfo.start();
+
+                        osc.connect(localGain);
+                        localGain.connect(gainNode.current!);
+                        osc.start();
+                        oscillators.current.push(osc);
+                    });
+
+                    const shimmer = audioContext.current.createOscillator();
+                    const shimmerGain = audioContext.current.createGain();
+                    shimmer.type = 'sine';
+                    shimmer.frequency.setValueAtTime(880, audioContext.current.currentTime);
+                    shimmerGain.gain.setValueAtTime(0.01, audioContext.current.currentTime);
+                    shimmer.connect(shimmerGain);
+                    shimmerGain.connect(gainNode.current!);
+                    shimmer.start();
+                    oscillators.current.push(shimmer);
+                }
+                setIsInitialized(true);
+            }
+
+            if (audioContext.current && audioContext.current.state === 'suspended') {
+                await audioContext.current.resume();
+            }
+
+            const targetGain = isMuted ? 0.8 : 0;
+            if (gainNode.current && audioContext.current) {
+                gainNode.current.gain.setTargetAtTime(targetGain + 0.001, audioContext.current.currentTime, 0.5);
+            }
+            setIsMuted(!isMuted);
+        } catch (err) {
+            console.error('Audio start failed:', err);
+        }
+    }, [isMuted, isInitialized]);
+
+    useEffect(() => {
         return () => {
-            // Strict cleanup for mobile memory
             oscillators.current.forEach(osc => {
                 try {
                     osc.stop();
@@ -30,71 +86,14 @@ export default function BackgroundAudio() {
                 audioContext.current = null;
             }
         };
-    }, [isStarted]);
+    }, []);
 
-    const startAudio = async () => {
-        try {
-            if (!audioContext.current || audioContext.current.state === 'closed') {
-                audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-                gainNode.current = audioContext.current.createGain();
-                gainNode.current.gain.setValueAtTime(0, audioContext.current.currentTime);
-                gainNode.current.connect(audioContext.current.destination);
-
-                // Reduced oscillator count for stability
-                const baseFrequencies = [55, 110];
-                baseFrequencies.forEach((freq) => {
-                    const osc = audioContext.current!.createOscillator();
-                    const localGain = audioContext.current!.createGain();
-
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, audioContext.current!.currentTime);
-                    localGain.gain.setValueAtTime(0.06, audioContext.current!.currentTime);
-
-                    const lfo = audioContext.current!.createOscillator();
-                    const lfoGain = audioContext.current!.createGain();
-                    lfo.frequency.setValueAtTime(0.02, audioContext.current!.currentTime);
-                    lfoGain.gain.setValueAtTime(0.5, audioContext.current!.currentTime);
-
-                    lfo.connect(lfoGain);
-                    lfoGain.connect(osc.frequency);
-                    lfo.start();
-
-                    osc.connect(localGain);
-                    localGain.connect(gainNode.current!);
-                    osc.start();
-                    oscillators.current.push(osc);
-                });
-
-                // Single shimmer oscillator
-                const shimmer = audioContext.current.createOscillator();
-                const shimmerGain = audioContext.current.createGain();
-                shimmer.type = 'sine';
-                shimmer.frequency.setValueAtTime(880, audioContext.current.currentTime);
-                shimmerGain.gain.setValueAtTime(0.01, audioContext.current.currentTime);
-                shimmer.connect(shimmerGain);
-                shimmerGain.connect(gainNode.current!);
-                shimmer.start();
-                oscillators.current.push(shimmer);
-            }
-
-            if (audioContext.current.state === 'suspended') {
-                await audioContext.current.resume();
-            }
-
-            const targetGain = isMuted ? 0.8 : 0;
-            // Use setTargetAtTime for a more robust ramp on mobile
-            gainNode.current!.gain.setTargetAtTime(targetGain + 0.001, audioContext.current.currentTime, 0.5);
-            setIsMuted(!isMuted);
-        } catch (err) {
-            console.error('Audio start failed:', err);
-        }
-    };
+    if (!isStarted) return null;
 
     return (
         <button
             onClick={startAudio}
-            disabled={!isStarted}
-            className={`fixed bottom-8 left-8 z-[200] w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all backdrop-blur-md ${!isStarted ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            className="fixed bottom-8 left-8 z-[200] w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all backdrop-blur-md opacity-100"
             title={isMuted ? "Enable Sound" : "Mute Sound"}
         >
             {isMuted ? (
