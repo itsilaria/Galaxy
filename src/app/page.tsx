@@ -18,11 +18,10 @@ export default function Home() {
     const t = translations[currentLanguage as keyof typeof translations];
 
     return (
-        <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
-            <WelcomeScreen />
-            <BackgroundAudio />
-
-            <Scene />
+       <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
+    {/* <WelcomeScreen /> */}  {/* ← Commentala temporaneamente */}
+    <BackgroundAudio />
+    <Scene />
 
             {isStarted && (
                 <>
