@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import StarField from './StarField';
+import { useState, useEffect, useMemo } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import StarField from './StarField'; // il componente originale
 
 export default function OptimizedStarField() {
   const [isMobile, setIsMobile] = useState(false);
@@ -11,6 +13,13 @@ export default function OptimizedStarField() {
     setIsMobile(window.innerWidth < 768);
   }, []);
 
-  // Passa la prop mobileOverride al componente originale
-  return <StarField mobileOverride={isMobile} />;
+  // Prop wrapper per passare i limiti di performance
+  const mobileSettings = useMemo(() => {
+    return {
+      rotationSpeed: isMobile ? 0.1 : 0.4, // rotazione più lenta su mobile
+      maxStars: isMobile ? 300 : undefined, // massimo 300 stelle su mobile
+    };
+  }, [isMobile]);
+
+  return <StarField mobileOverride={mobileSettings} />;
 }
