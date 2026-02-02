@@ -1,5 +1,4 @@
 'use client';
-
 import { useGalaxyStore } from '@/store/useGalaxyStore';
 import { translations } from '@/utils/translations';
 import { useState } from 'react';
@@ -32,7 +31,6 @@ export default function WelcomeScreen() {
                 <p className="text-white/40 text-sm md:text-lg mb-12 uppercase tracking-[0.5em] font-light animate-slide-up [animation-delay:0.2s]">
                     {t.subtitle}
                 </p>
-
                 <button
                     onClick={handleEnter}
                     className="group relative px-12 py-5 rounded-full bg-white text-black font-bold uppercase text-xs tracking-[0.3em] overflow-hidden transition-all hover:scale-105 active:scale-95 animate-slide-up [animation-delay:0.4s]"
@@ -40,7 +38,6 @@ export default function WelcomeScreen() {
                     <span className="relative z-10">Enter the Galaxy</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
-
                 <div className="mt-8 text-[10px] text-white/20 uppercase tracking-widest animate-pulse">
                     Click to initialize spatial audio
                 </div>
