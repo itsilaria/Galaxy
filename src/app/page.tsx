@@ -10,16 +10,29 @@ import { translations } from "@/utils/translations";
 import WelcomeScreen from "@/components/UI/WelcomeScreen";
 import BackgroundAudio from "@/components/UI/BackgroundAudio";
 import VisitorCounter from "@/components/UI/VisitorCounter";
+import { useState, useEffect } from "react";
 
 export default function Home() {
     const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
     const t = translations[currentLanguage as keyof typeof translations];
+    const [isMobile, setIsMobile] = useState(false);
+    
+    useEffect(() => {
+        const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        setIsMobile(mobile);
+    }, []);
     
     return (
         <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
             <WelcomeScreen />
             <BackgroundAudio />
-            <Scene />
+            {!isMobile ? (
+                <Scene />
+            ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-white/60 text-sm">Mobile version - Scene disabled for testing</p>
+                </div>
+            )}
             {isStarted && (
                 <>
                     <SecretModal />
