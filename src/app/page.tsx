@@ -1,5 +1,6 @@
 'use client';
 import Scene from "@/components/Scene";
+import MobileStarField from "@/components/MobileStarField";
 import SecretModal from "@/components/UI/SecretModal";
 import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
 import LanguageSelector from "@/components/UI/LanguageSelector";
@@ -26,13 +27,7 @@ export default function Home() {
         <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
             <WelcomeScreen />
             <BackgroundAudio />
-            {!isMobile ? (
-                <Scene />
-            ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                    <p className="text-white/60 text-sm">Mobile version - Scene disabled for testing</p>
-                </div>
-            )}
+            {!isMobile ? <Scene /> : <MobileStarField />}
             {isStarted && (
                 <>
                     <SecretModal />
