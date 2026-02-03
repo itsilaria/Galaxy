@@ -1,134 +1,55 @@
 'use client';
-import { useRef, useMemo, memo, useEffect, useState } from 'react';
-import * as THREE from 'three';
-import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { useGalaxyStore, Secret } from '@/store/useGalaxyStore';
+import Scene from "@/components/Scene";
+import SecretModal from "@/components/UI/SecretModal";
+import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
+import LanguageSelector from "@/components/UI/LanguageSelector";
+import RandomJumpButton from "@/components/UI/RandomJumpButton";
+import SupportButton from "@/components/UI/SupportButton";
+import { useGalaxyStore } from "@/store/useGalaxyStore";
+import { translations } from "@/utils/translations";
+import WelcomeScreen from "@/components/UI/WelcomeScreen";
+import BackgroundAudio from "@/components/UI/BackgroundAudio";
+import VisitorCounter from "@/components/UI/VisitorCounter";
 
-const COLOR_WHITE = new THREE.Color('#ffffff');
-
-const SupernovaStar = memo(({ secret, isMobile }: { secret: Secret; isMobile: boolean }) => {
-  const mesh = useRef<THREE.Mesh>(null);
-  const selectSecret = useGalaxyStore(s => s.selectSecret);
-  const positionVec = useMemo(() => new THREE.Vector3(...secret.position), [secret.position]);
-  const [pointerDownPos, setPointerDownPos] = useState<{ x: number; y: number } | null>(null);
-
-  // Loop di rotazione con limite FPS su mobile
-  useFrame((state, delta) => {
-    if (!mesh.current) return;
-    const rotationSpeed = isMobile ? 0.1 : 0.4;
-    mesh.current.rotation.y += delta * rotationSpeed;
-  });
-
-  const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    setPointerDownPos({ x: e.clientX, y: e.clientY });
-  };
-
-  const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    if (!pointerDownPos) return;
-
-    const dx = e.clientX - pointerDownPos.x;
-    const dy = e.clientY - pointerDownPos.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance < 10) selectSecret(secret);
-    setPointerDownPos(null);
-  };
-
-  return (
-    <group position={positionVec}>
-      <mesh
-        ref={mesh}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-      >
-        <sphereGeometry args={[3, 16, 16]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-    </group>
-  );
-});
-
-SupernovaStar.displayName = 'SupernovaStar';
-
-export default function StarField() {
-  const visualMeshRef = useRef<THREE.InstancedMesh>(null);
-  const hitMeshRef = useRef<THREE.InstancedMesh>(null);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  const secrets = useGalaxyStore(s => s.secrets);
-  
-  const [isMobile, setIsMobile] = useState(false);
-  const [pointerDownPos, setPointerDownPos] = useState<{ x: number; y: number } | null>(null);
-  const selectSecret = useGalaxyStore(s => s.selectSecret);
-
-  // Detect mobile
-  useEffect(() => {
-    const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    setIsMobile(mobile);
-  }, []);
-
-  // Riduci numero stelle su mobile
-  const starsToRender = isMobile ? secrets.slice(0, 300) : secrets;
-
-  useEffect(() => {
-    if (!visualMeshRef.current || !hitMeshRef.current) return;
-
-    starsToRender.forEach((star, i) => {
-      dummy.position.set(...star.position);
-      dummy.updateMatrix();
-      visualMeshRef.current!.setMatrixAt(i, dummy.matrix);
-      hitMeshRef.current!.setMatrixAt(i, dummy.matrix);
-    });
-
-    visualMeshRef.current.instanceMatrix.needsUpdate = true;
-    hitMeshRef.current.instanceMatrix.needsUpdate = true;
-
-    return () => {
-      // Cleanup animazioni
-      if (visualMeshRef.current) visualMeshRef.current.instanceMatrix.needsUpdate = false;
-      if (hitMeshRef.current) hitMeshRef.current.instanceMatrix.needsUpdate = false;
-    };
-  }, [starsToRender, dummy]);
-
-  const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    setPointerDownPos({ x: e.clientX, y: e.clientY });
-  };
-
-  const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    if (!pointerDownPos || e.instanceId === undefined) return;
-
-    const dx = e.clientX - pointerDownPos.x;
-    const dy = e.clientY - pointerDownPos.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance < 10) selectSecret(starsToRender[e.instanceId]);
-    setPointerDownPos(null);
-  };
-
-  return (
-    <group>
-      {/* INTERACTION LAYER */}
-      <instancedMesh
-        ref={hitMeshRef}
-        args={[undefined, undefined, starsToRender.length]}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-      >
-        <sphereGeometry args={[2.5, 8, 8]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </instancedMesh>
-
-      {/* VISUAL LAYER */}
-      <instancedMesh
-        ref={visualMeshRef}
-        args={[undefined, undefined, starsToRender.length]}
-      >
-        <sphereGeometry args={[2.5, 8, 8]} />
-        <meshBasicMaterial color={COLOR_WHITE} />
-      </instancedMesh>
-    </group>
-  );
+export default function Home() {
+    const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
+    const t = translations[currentLanguage as keyof typeof translations];
+    
+    return (
+        <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
+            <WelcomeScreen />
+            <BackgroundAudio />
+            <Scene />
+            {isStarted && (
+                <>
+                    <SecretModal />
+                    <ComposeSecretOverlay />
+                    <LanguageSelector />
+                    <RandomJumpButton />
+                    <SupportButton />
+                    <VisitorCounter />
+                    {/* UI Overlay */}
+                    <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-10 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0 animate-fade-in">
+                        <div className="bg-black/20 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-2 md:p-0 rounded-lg">
+                            <h1 className="text-3xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-pink-200 tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] leading-none">
+                                {t.title}
+                            </h1>
+                            <p className="text-white/60 text-[10px] md:text-base mt-1 md:mt-2 max-w-[200px] md:max-w-md leading-relaxed">
+                                {t.subtitle}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => startAddingSecret()}
+                            className="pointer-events-auto bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-xl text-white px-6 md:px-8 py-2 md:py-3 rounded-full border border-white/20 transition-all text-xs md:text-base font-medium glow-hover shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                        >
+                            {t.button}
+                        </button>
+                    </div>
+                    <div className="absolute bottom-4 md:bottom-8 right-4 md:right-8 pointer-events-none text-white/10 text-[8px] md:text-xs tracking-widest uppercase">
+                        {t.footer}
+                    </div>
+                </>
+            )}
+        </main>
+    );
 }
