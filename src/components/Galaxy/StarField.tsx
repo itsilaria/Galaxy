@@ -56,7 +56,7 @@ export default function StarField() {
   const visualMeshRef = useRef<THREE.InstancedMesh>(null);
   const hitMeshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const standardStars = useGalaxyStore(s => s.stars);
+  const secrets = useGalaxyStore(s => s.secrets);
   
   const [isMobile, setIsMobile] = useState(false);
   const [pointerDownPos, setPointerDownPos] = useState<{ x: number; y: number } | null>(null);
@@ -69,7 +69,7 @@ export default function StarField() {
   }, []);
 
   // Riduci numero stelle su mobile
-  const starsToRender = isMobile ? standardStars.slice(0, 300) : standardStars;
+  const starsToRender = isMobile ? secrets.slice(0, 300) : secrets;
 
   useEffect(() => {
     if (!visualMeshRef.current || !hitMeshRef.current) return;
