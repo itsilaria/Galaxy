@@ -1,3 +1,4 @@
+'use client';
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { Suspense, useRef, useState, useEffect, useMemo, memo } from 'react';
 import * as THREE from 'three';
@@ -58,17 +59,12 @@ Nebula.displayName = 'Nebula';
 
 const SceneContent = memo(() => {
     const isModalOpen = useGalaxyStore(s => s.isModalOpen);
-    const [sparkleCount, setSparkleCount] = useState({ c1: 2000, c2: 1000 });
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-        if (isMobile) {
-            setSparkleCount({ c1: 600, c2: 300 });
-        }
+        const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        setIsMobile(mobile);
     }, []);
-
-    const { c1, c2 } = sparkleCount;
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     return (
         <>
@@ -77,12 +73,12 @@ const SceneContent = memo(() => {
             <pointLight position={[10, 10, 10]} intensity={1} />
 
             <Suspense fallback={null}>
-                <WarpStars />
-                <Nebula />
+                {!isMobile && <WarpStars />}
+                {!isMobile && <Nebula />}
                 {!isMobile && (
                     <>
-                        <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
-                        <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
+                        <Sparkles count={2000} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
+                        <Sparkles count={1000} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
                     </>
                 )}
                 <StarField />
@@ -95,7 +91,7 @@ const SceneContent = memo(() => {
                 minDistance={5}
                 maxDistance={80}
                 autoRotate={!isModalOpen}
-                autoRotateSpeed={0.5}
+                autoRotateSpeed={isMobile ? 0.2 : 0.5}
                 makeDefault
                 enableDamping={true}
                 dampingFactor={0.05}
@@ -107,18 +103,49 @@ const SceneContent = memo(() => {
 SceneContent.displayName = 'SceneContent';
 
 export default function Scene() {
+    const [hasWebGL, setHasWebGL] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        // Detect mobile
+        const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        setIsMobile(mobile);
+
+        // Check WebGL support
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) {
+                setHasWebGL(false);
+            }
+        } catch (e) {
+            setHasWebGL(false);
+        }
+    }, []);
+
+    if (!hasWebGL) {
+        return (
+            <div className="w-full h-full bg-black flex items-center justify-center">
+                <p className="text-white/60 text-sm">WebGL not supported on this device</p>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full h-full bg-black">
             <Canvas
                 camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={[1, 1]}
+                dpr={isMobile ? [0.5, 1] : [1, 2]}
                 gl={{
                     antialias: false,
                     alpha: false,
-                    powerPreference: "high-performance",
+                    powerPreference: isMobile ? "low-power" : "high-performance",
                     stencil: false,
                     depth: true,
                     precision: 'lowp'
+                }}
+                onCreated={({ gl }) => {
+                    gl.setClearColor('#000000');
                 }}
             >
                 <SceneContent />
