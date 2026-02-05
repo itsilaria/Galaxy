@@ -1,6 +1,5 @@
 'use client';
 import Scene from "@/components/Scene";
-import MobileStarField from "@/components/MobileStarField";
 import SecretModal from "@/components/UI/SecretModal";
 import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
 import LanguageSelector from "@/components/UI/LanguageSelector";
@@ -11,23 +10,16 @@ import { translations } from "@/utils/translations";
 import WelcomeScreen from "@/components/UI/WelcomeScreen";
 import BackgroundAudio from "@/components/UI/BackgroundAudio";
 import VisitorCounter from "@/components/UI/VisitorCounter";
-import { useState, useEffect } from "react";
 
 export default function Home() {
     const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
     const t = translations[currentLanguage as keyof typeof translations];
-    const [isMobile, setIsMobile] = useState(false);
-    
-    useEffect(() => {
-        const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
-        setIsMobile(mobile);
-    }, []);
     
     return (
         <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
             <WelcomeScreen />
             <BackgroundAudio />
-            {!isMobile ? <Scene /> : <MobileStarField />}
+            <Scene />
             {isStarted && (
                 <>
                     <SecretModal />
