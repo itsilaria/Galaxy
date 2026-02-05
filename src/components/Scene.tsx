@@ -62,7 +62,7 @@ const SceneContent = memo(() => {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        const mobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         setIsMobile(mobile);
     }, []);
 
@@ -73,10 +73,11 @@ const SceneContent = memo(() => {
             <pointLight position={[10, 10, 10]} intensity={1} />
 
             <Suspense fallback={null}>
-                {!isMobile && <WarpStars />}
-                {!isMobile && <Nebula />}
+                {/* Disabilita completamente effetti pesanti su mobile */}
                 {!isMobile && (
                     <>
+                        <WarpStars />
+                        <Nebula />
                         <Sparkles count={2000} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
                         <Sparkles count={1000} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
                     </>
@@ -87,11 +88,11 @@ const SceneContent = memo(() => {
 
             <OrbitControls
                 enablePan={false}
-                enableZoom={true}
+                enableZoom={!isMobile}
                 minDistance={5}
                 maxDistance={80}
                 autoRotate={!isModalOpen}
-                autoRotateSpeed={isMobile ? 0.2 : 0.5}
+                autoRotateSpeed={0.3}
                 makeDefault
                 enableDamping={true}
                 dampingFactor={0.05}
@@ -135,18 +136,20 @@ export default function Scene() {
         <div className="w-full h-full bg-black">
             <Canvas
                 camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={isMobile ? [0.5, 1] : [1, 2]}
+                dpr={isMobile ? [0.5, 0.5] : [1, 2]}
                 gl={{
                     antialias: false,
                     alpha: false,
                     powerPreference: isMobile ? "low-power" : "high-performance",
                     stencil: false,
                     depth: true,
-                    precision: 'lowp'
+                    precision: isMobile ? 'lowp' : 'mediump',
+                    failIfMajorPerformanceCaveat: false
                 }}
                 onCreated={({ gl }) => {
                     gl.setClearColor('#000000');
                 }}
+                frameloop="demand"
             >
                 <SceneContent />
             </Canvas>
