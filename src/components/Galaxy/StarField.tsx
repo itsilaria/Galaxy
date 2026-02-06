@@ -36,22 +36,22 @@ export default function StarField() {
 
   return (
     <group>
-      {/* INTERACTION LAYER - Hitbox più grande */}
+      {/* INTERACTION LAYER - Hitbox MOLTO più grande */}
       <instancedMesh
         ref={hitMeshRef}
         args={[undefined, undefined, secrets.length]}
         onClick={handleClick}
       >
-        <sphereGeometry args={[4, 8, 8]} />
+        <sphereGeometry args={[6, 8, 8]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </instancedMesh>
 
-      {/* VISUAL LAYER - Stelle più grandi e visibili */}
+      {/* VISUAL LAYER - Stelle MOLTO più grandi e visibili */}
       <instancedMesh
         ref={visualMeshRef}
         args={[undefined, undefined, secrets.length]}
       >
-        <sphereGeometry args={[1.5, 12, 12]} />
+        <sphereGeometry args={[3, 16, 16]} />
         <meshBasicMaterial color={COLOR_WHITE} />
       </instancedMesh>
     </group>
