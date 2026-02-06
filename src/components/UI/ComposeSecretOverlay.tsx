@@ -35,7 +35,7 @@ export default function ComposeSecretOverlay() {
                 // Open Buy Me A Coffee in a new tab for payment
                 window.open('https://buymeacoffee.com/perunbro', '_blank');
             }
-            addSecret(text, starType === 'supernova', starType, starType === 'supernova' ? selectedColor : undefined);
+            addSecret(text);
             setText('');
             setStarType('standard');
             setError(null);
