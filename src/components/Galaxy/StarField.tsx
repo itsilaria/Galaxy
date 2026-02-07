@@ -29,10 +29,16 @@ export default function StarField() {
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    if (e.instanceId !== undefined) {
+    if (e.instanceId !== undefined && secrets[e.instanceId]) {
+      console.log('Clicked star:', e.instanceId, secrets[e.instanceId]);
       selectSecret(secrets[e.instanceId]);
     }
   };
+
+  // Don't render if no secrets
+  if (!secrets || secrets.length === 0) {
+    return null;
+  }
 
   return (
     <group>
