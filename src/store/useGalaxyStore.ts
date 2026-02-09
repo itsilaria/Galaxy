@@ -4,6 +4,7 @@ export interface Secret {
   id: string;
   text: string;
   isMock?: boolean;
+  position?: [number, number, number]; // nuova proprietà per clustering
 }
 
 interface GalaxyStore {
@@ -26,7 +27,14 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
     try {
       const res = await fetch("/api/secrets");
       const data: Secret[] = await res.json();
-      set({ secrets: data });
+
+      // assegna posizione random se mancante (clustering semplice)
+      const secretsWithPos = data.map((s) => ({
+        ...s,
+        position: s.position || [Math.random() * 10 - 5, Math.random() * 5, Math.random() * 10 - 5],
+      }));
+
+      set({ secrets: secretsWithPos });
     } catch (err) {
       console.error("Errore fetchSecrets:", err);
     }
@@ -34,12 +42,18 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
 
   addSecret: async (text: string) => {
     try {
-      const res = await fetch("/api/secrets", {
+      const newSecret: Secret = {
+        id: Date.now().toString(),
+        text,
+        position: [Math.random() * 10 - 5, Math.random() * 5, Math.random() * 10 - 5],
+      };
+
+      await fetch("/api/secrets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify(newSecret),
       });
-      const newSecret: Secret = await res.json();
+
       set({ secrets: [...get().secrets, newSecret] });
     } catch (err) {
       console.error("Errore addSecret:", err);
