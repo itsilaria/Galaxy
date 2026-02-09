@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useGalaxyStore } from "./useGalaxyStore";
 import { Sphere } from "@react-three/drei";
+import { MeshStandardMaterial } from "three";
 
 export const StarField: React.FC = () => {
   const secrets = useGalaxyStore((state) => state.secrets);
@@ -16,8 +17,8 @@ export const StarField: React.FC = () => {
       {secrets.map((secret) => (
         <Sphere
           key={secret.id}
-          args={[0.2, 16, 16]}
-          position={[Math.random() * 10 - 5, Math.random() * 5, Math.random() * 10 - 5]}
+          args={[0.25, 16, 16]}
+          position={secret.position}
           onPointerDown={(e) => {
             e.stopPropagation();
             selectSecret(secret);
@@ -25,10 +26,11 @@ export const StarField: React.FC = () => {
         >
           <meshStandardMaterial
             color={secret.isMock ? "gray" : "yellow"}
+            emissive={secret.isMock ? "gray" : "yellow"}
+            emissiveIntensity={0.5}
             transparent
             opacity={0}
-            attach="material"
-            onUpdate={(self) => (self.opacity = 1)} // fade-in semplice
+            onUpdate={(self: MeshStandardMaterial) => (self.opacity = 1)}
           />
         </Sphere>
       ))}
