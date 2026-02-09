@@ -4,7 +4,7 @@ export interface Secret {
   id: string;
   text: string;
   isMock?: boolean;
-  position?: [number, number, number]; // nuova proprietà per clustering
+  position?: [number, number, number]; // posizione 3D
 }
 
 interface GalaxyStore {
@@ -28,10 +28,13 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
       const res = await fetch("/api/secrets");
       const data: Secret[] = await res.json();
 
-      // assegna posizione random se mancante (clustering semplice)
       const secretsWithPos = data.map((s) => ({
         ...s,
-        position: s.position || [Math.random() * 10 - 5, Math.random() * 5, Math.random() * 10 - 5],
+        position: s.position || [
+          Math.random() * 10 - 5,
+          Math.random() * 5,
+          Math.random() * 10 - 5,
+        ],
       }));
 
       set({ secrets: secretsWithPos });
@@ -40,12 +43,16 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
     }
   },
 
-  addSecret: async (text: string) => {
+  addSecret: async (text: string): Promise<void> => {
     try {
       const newSecret: Secret = {
         id: Date.now().toString(),
         text,
-        position: [Math.random() * 10 - 5, Math.random() * 5, Math.random() * 10 - 5],
+        position: [
+          Math.random() * 10 - 5,
+          Math.random() * 5,
+          Math.random() * 10 - 5,
+        ],
       };
 
       await fetch("/api/secrets", {
