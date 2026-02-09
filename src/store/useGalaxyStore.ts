@@ -7,11 +7,7 @@ export interface Secret {
     position: [number, number, number];
     color: string;
     timestamp: number;
-    country: string;
     language: string;
-    isPremium?: boolean;
-    starType?: 'standard' | 'supernova';
-    glowColor?: string;
 }
 
 type SupportedLanguage = 'en' | 'it' | 'es' | 'fr' | 'de' | 'jp';
@@ -26,6 +22,7 @@ interface GalaxyState {
     isWarping: boolean;
     isStarted: boolean;
     _hasHydrated: boolean;
+    isLoading: boolean;
 
     // Actions
     setLanguage: (lang: SupportedLanguage) => void;
@@ -34,61 +31,18 @@ interface GalaxyState {
     closeModal: () => void;
     startAddingSecret: () => void;
     cancelAddingSecret: () => void;
-    addSecret: (text: string, isPremium?: boolean, starType?: 'standard' | 'supernova', glowColor?: string) => void;
+    addSecret: (text: string) => Promise<void>;
+    fetchSecrets: () => Promise<void>;
     startGalaxy: () => void;
     setHasHydrated: (state: boolean) => void;
 }
-
-// Mock data generator - Deterministic for hydration stability
-const generateMockSecrets = (count: number, lang: SupportedLanguage): Secret[] => {
-    const secrets: Secret[] = [];
-    const colors = ['#ffddcc', '#ccddff', '#ffccdd', '#ddffcc', '#ffffff'];
-
-    let seed = 42;
-    const pseudoRandom = () => {
-        seed = (seed * 16807) % 2147483647;
-        return (seed - 1) / 2147483646;
-    };
-
-    const contentPool = {
-        en: ["I haven't told my parents I lost my job.", "I'm in love with my best friend.", "I want to move to Mars.", "I stole a balloon when I was 5.", "Sometimes I just want to disappear.", "I'm afraid of the dark."],
-        it: ["Non ho detto ai miei che ho perso il lavoro.", "Sono innamorato della mia migliore amica.", "Voglio trasferirmi su Marte.", "Ho rubato un palloncino a 5 anni.", "A volte vorrei solo sparire.", "Ho paura del buio.", "La pizza con l'ananas mi piace.", "Odio il mio capo ma sorrido sempre."],
-        es: ["No le he dicho a mis padres que perdí mi trabajo.", "Estoy enamorado de mi mejor amigo.", "Quiero mudarme a Marte.", "Robé un globo cuando tenía 5 años.", "A veces solo quiero desaparecer.", "Tengo miedo a la oscuridad."],
-        fr: ["Je n'ai pas dit à mes parents que j'ai perdu mon emploi.", "Je suis amoureux de mon meilleur ami.", "Je veux déménager sur Mars.", "J'ai volé un ballon quand j'avais 5 ans.", "Parfois, je veux juste disparaître.", "J'ai peur du noir."],
-        de: ["Ich habe meinen Eltern nicht gesagt, dass ich meinen Job verloren habe.", "Ich bin in meinen besten Freund verliebt.", "Ich möchte zum Mars ziehen.", "Ich habe als Kind einen Ballon gestohlen.", "Manchmal möchte ich einfach verschwinden.", "Ich habe Angst im Dunkeln."],
-        jp: ["両親に仕事を失ったことを言っていません。", "親友に恋しています。", "火星に移住したいです。", "5歳の時に風船を盗みました。", "時々消えてしまいたいと思います。", "暗闇が怖いです。"]
-    };
-
-    const pool = contentPool[lang as SupportedLanguage] || contentPool['en'];
-
-    for (let i = 0; i < count; i++) {
-        const r = 10 + pseudoRandom() * 40;
-        const theta = pseudoRandom() * Math.PI * 2;
-        const phi = Math.acos(2 * pseudoRandom() - 1);
-
-        const x = r * Math.sin(phi) * Math.cos(theta);
-        const y = r * Math.sin(phi) * Math.sin(theta);
-        const z = r * Math.cos(phi);
-
-        secrets.push({
-            id: `secret-${lang}-${i}`,
-            text: pool[Math.floor(pseudoRandom() * pool.length)],
-            position: [x, y, z],
-            color: colors[Math.floor(pseudoRandom() * colors.length)],
-            timestamp: 1640995200000 + i * 10000,
-            language: lang,
-            country: lang.toUpperCase(),
-        });
-    }
-    return secrets;
-};
 
 let languageChangeTimeout: NodeJS.Timeout | null = null;
 
 export const useGalaxyStore = create<GalaxyState>()(
     persist(
-        (set) => ({
-            secrets: generateMockSecrets(150, 'en'),
+        (set, get) => ({
+            secrets: [],
             selectedSecret: null,
             isModalOpen: false,
             isAddingSecret: false,
@@ -97,55 +51,83 @@ export const useGalaxyStore = create<GalaxyState>()(
             isWarping: false,
             isStarted: false,
             _hasHydrated: false,
+            isLoading: false,
 
             setHasHydrated: (state) => set({ _hasHydrated: state }),
-            setLanguage: (lang) => {
-                // Clear any pending timeout to prevent memory leaks
-                if (languageChangeTimeout) {
-                    clearTimeout(languageChangeTimeout);
-                }
 
-                set({ isWarping: true });
+            setLanguage: (lang) => {
+                if (languageChangeTimeout) clearTimeout(languageChangeTimeout);
+                set({ isWarping: true, currentLanguage: lang });
                 languageChangeTimeout = setTimeout(() => {
-                    set({
-                        currentLanguage: lang,
-                        secrets: generateMockSecrets(150, lang),
-                        isWarping: false
-                    });
+                    set({ isWarping: false });
                     languageChangeTimeout = null;
                 }, 1000);
             },
+
             selectSecret: (secret) => set({ selectedSecret: secret, isModalOpen: !!secret }),
             openModal: () => set({ isModalOpen: true }),
             closeModal: () => set({ isModalOpen: false, selectedSecret: null }),
             startAddingSecret: () => set({ isAddingSecret: true }),
             cancelAddingSecret: () => set({ isAddingSecret: false }),
-            startGalaxy: () => set({ isStarted: true }),
-            addSecret: (text, isPremium, starType, glowColor) => set((state) => {
-                const newSecret: Secret = {
-                    id: `new-${Date.now()}`,
-                    text,
-                    position: [
-                        (Math.random() - 0.5) * 40,
-                        (Math.random() - 0.5) * 40,
-                        (Math.random() - 0.5) * 40
-                    ],
-                    color: isPremium ? (glowColor || '#ffd700') : '#ff00aa',
-                    timestamp: Date.now(),
-                    language: state.currentLanguage,
-                    country: state.currentLanguage.toUpperCase(),
-                    starType: starType || 'standard',
-                    isPremium
-                };
-                return { secrets: [...state.secrets, newSecret], isAddingSecret: false };
-            }),
+            startGalaxy: () => {
+                set({ isStarted: true });
+                get().fetchSecrets();
+            },
+
+            fetchSecrets: async () => {
+                try {
+                    set({ isLoading: true });
+                    const response = await fetch('/api/secrets');
+                    const data = await response.json();
+                    if (data.secrets) {
+                        set({ secrets: data.secrets, isLoading: false });
+                    }
+                } catch (error) {
+                    console.error('Error fetching secrets:', error);
+                    set({ isLoading: false });
+                }
+            },
+
+            addSecret: async (text: string) => {
+                try {
+                    const newSecret = {
+                        text,
+                        position: [
+                            (Math.random() - 0.5) * 40,
+                            (Math.random() - 0.5) * 40,
+                            (Math.random() - 0.5) * 40
+                        ] as [number, number, number],
+                        color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                        language: get().currentLanguage,
+                    };
+
+                    const response = await fetch('/api/secrets', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newSecret),
+                    });
+
+                    const data = await response.json();
+                    if (data.success && data.secret) {
+                        set((state) => ({
+                            secrets: [...state.secrets, data.secret],
+                            isAddingSecret: false
+                        }));
+                    }
+                } catch (error) {
+                    console.error('Error adding secret:', error);
+                    set({ isAddingSecret: false });
+                }
+            },
         }),
         {
-            name: 'galaxy-secrets-storage',
+            name: 'galaxy-secrets-storage-v2',
             onRehydrateStorage: () => (state) => {
                 state?.setHasHydrated(true);
             },
-            partialize: (state) => ({ secrets: state.secrets }),
+            partialize: (state) => ({
+                currentLanguage: state.currentLanguage
+            }),
         }
     )
 );

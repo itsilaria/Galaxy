@@ -1,3 +1,5 @@
+'use client';
+
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { Suspense, useRef, useState, useEffect, useMemo, memo } from 'react';
 import * as THREE from 'three';
@@ -27,7 +29,6 @@ const WarpStars = memo(() => {
 
 const Nebula = memo(() => {
     const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa', '#33ffaa'];
-
     const positions = useMemo(() => colors.map(() => new THREE.Vector3(
         (Math.random() - 0.5) * 60,
         (Math.random() - 0.5) * 60,
@@ -58,17 +59,11 @@ Nebula.displayName = 'Nebula';
 
 const SceneContent = memo(() => {
     const isModalOpen = useGalaxyStore(s => s.isModalOpen);
-    const [sparkleCount, setSparkleCount] = useState({ c1: 2000, c2: 1000 });
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-        if (isMobile) {
-            setSparkleCount({ c1: 600, c2: 300 });
-        }
+        setIsMobile(window.innerWidth < 768);
     }, []);
-
-    const { c1, c2 } = sparkleCount;
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     return (
         <>
@@ -77,12 +72,12 @@ const SceneContent = memo(() => {
             <pointLight position={[10, 10, 10]} intensity={1} />
 
             <Suspense fallback={null}>
-                <WarpStars />
-                <Nebula />
                 {!isMobile && (
                     <>
-                        <Sparkles count={c1} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
-                        <Sparkles count={c2} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
+                        <WarpStars />
+                        <Nebula />
+                        <Sparkles count={1500} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
+                        <Sparkles count={800} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
                     </>
                 )}
                 <StarField />
@@ -91,7 +86,7 @@ const SceneContent = memo(() => {
 
             <OrbitControls
                 enablePan={false}
-                enableZoom={true}
+                enableZoom={!isMobile}
                 minDistance={5}
                 maxDistance={80}
                 autoRotate={!isModalOpen}
@@ -107,11 +102,17 @@ const SceneContent = memo(() => {
 SceneContent.displayName = 'SceneContent';
 
 export default function Scene() {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        setIsMobile(window.innerWidth < 768);
+    }, []);
+
     return (
         <div className="w-full h-full bg-black">
             <Canvas
                 camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={[1, 1]}
+                dpr={isMobile ? [1, 1] : [1, 2]}
                 gl={{
                     antialias: false,
                     alpha: false,
