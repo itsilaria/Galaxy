@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { useGalaxyStore } from "./useGalaxyStore";
 
@@ -6,7 +8,10 @@ export const SecretModal: React.FC = () => {
 
   if (!isModalOpen || !selectedSecret) return null;
 
-  const shareUrl = `${window.location.origin}/?secret=${selectedSecret.id}`;
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/?secret=${selectedSecret.id}`
+      : "";
 
   return (
     <div
@@ -28,7 +33,10 @@ export const SecretModal: React.FC = () => {
 
         <button
           className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
-          onClick={() => navigator.clipboard.writeText(shareUrl)}
+          onClick={() => {
+            if (typeof navigator !== "undefined")
+              navigator.clipboard.writeText(shareUrl);
+          }}
         >
           Copia link segreto
         </button>
