@@ -13,8 +13,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === "POST") {
     try {
-      const { text } = req.body;
-      const newSecret = { id: Date.now().toString(), text };
+      // se il frontend manda solo { text }, creiamo l'oggetto completo
+      let newSecret = req.body;
+
+      if (!newSecret.id) {
+        newSecret = {
+          id: Date.now().toString(),
+          text: newSecret.text,
+          position: [
+            Math.random() * 10 - 5,
+            Math.random() * 5,
+            Math.random() * 10 - 5,
+          ],
+        };
+      }
+
       await redis.rpush("secrets", JSON.stringify(newSecret));
       res.status(201).json(newSecret);
     } catch (err) {
