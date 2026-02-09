@@ -1,129 +1,78 @@
 'use client';
 
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
-import { Suspense, useRef, useState, useEffect, useMemo, memo } from 'react';
+import { Suspense, useEffect, useState, memo } from 'react';
 import * as THREE from 'three';
-import { useFrame, Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 
 import StarField from './Galaxy/StarField';
 import CameraController from './Galaxy/CameraController';
 import { useGalaxyStore } from '@/store/useGalaxyStore';
 
 const WarpStars = memo(() => {
-    const isWarping = useGalaxyStore(s => s.isWarping);
-    const starRef = useRef<any>(null);
+  const isWarping = useGalaxyStore(s => s.isWarping);
+  const ref = useRef<any>(null);
 
-    useFrame((state, delta) => {
-        if (starRef.current) {
-            const targetSpeed = isWarping ? 50 : 0.5;
-            starRef.current.speed = THREE.MathUtils.lerp(starRef.current.speed || 1, targetSpeed, delta * 2);
-        }
-    });
+  useFrame((_, delta) => {
+    if (!ref.current) return;
+    const target = isWarping ? 40 : 1;
+    ref.current.speed = THREE.MathUtils.lerp(ref.current.speed ?? 1, target, delta * 2);
+  });
 
-    return (
-        <group raycast={() => null}>
-            <Stars ref={starRef} radius={100} depth={50} count={3000} factor={4} saturation={0} fade />
-        </group>
-    );
+  return (
+    <group raycast={() => null}>
+      <Stars ref={ref} radius={120} depth={60} count={3000} factor={4} fade />
+    </group>
+  );
 });
-
-const Nebula = memo(() => {
-    const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa', '#33ffaa'];
-    const positions = useMemo(() => colors.map(() => new THREE.Vector3(
-        (Math.random() - 0.5) * 60,
-        (Math.random() - 0.5) * 60,
-        (Math.random() - 0.5) * 60
-    )), []);
-
-    return (
-        <group raycast={() => null}>
-            {colors.map((color, i) => (
-                <Sparkles
-                    key={i}
-                    position={positions[i]}
-                    count={150}
-                    scale={40}
-                    size={6}
-                    speed={0.1}
-                    opacity={0.08}
-                    color={color}
-                    raycast={() => null}
-                />
-            ))}
-        </group>
-    );
-});
-
-WarpStars.displayName = 'WarpStars';
-Nebula.displayName = 'Nebula';
 
 const SceneContent = memo(() => {
-    const isModalOpen = useGalaxyStore(s => s.isModalOpen);
-    const [isMobile, setIsMobile] = useState(false);
+  const isModalOpen = useGalaxyStore(s => s.isModalOpen);
+  const [isMobile, setIsMobile] = useState(false);
 
-    useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
-    }, []);
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
-    return (
-        <>
-            <fog attach="fog" args={['#000000', 10, 100]} />
-            <ambientLight intensity={0.2} />
-            <pointLight position={[10, 10, 10]} intensity={1} />
+  return (
+    <>
+      <fog attach="fog" args={['#000', 10, 120]} />
+      <ambientLight intensity={0.3} />
+      <pointLight position={[10, 10, 10]} intensity={1} />
 
-            <Suspense fallback={null}>
-                {!isMobile && (
-                    <>
-                        <WarpStars />
-                        <Nebula />
-                        <Sparkles count={1500} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
-                        <Sparkles count={800} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
-                    </>
-                )}
-                <StarField />
-                <CameraController />
-            </Suspense>
+      <Suspense fallback={null}>
+        {!isMobile && (
+          <>
+            <WarpStars />
+            <Sparkles raycast={() => null} count={1200} scale={120} size={2} speed={0.4} opacity={0.4} />
+          </>
+        )}
+        <StarField />
+        <CameraController />
+      </Suspense>
 
-            <OrbitControls
-                enablePan={false}
-                enableZoom={!isMobile}
-                minDistance={5}
-                maxDistance={80}
-                autoRotate={!isModalOpen}
-                autoRotateSpeed={0.5}
-                makeDefault
-                enableDamping={true}
-                dampingFactor={0.05}
-            />
-        </>
-    );
+      <OrbitControls
+        enablePan={false}
+        enableZoom={!isMobile}
+        autoRotate={!isModalOpen}
+        autoRotateSpeed={0.4}
+        minDistance={5}
+        maxDistance={80}
+        enableDamping
+        dampingFactor={0.05}
+        makeDefault
+      />
+    </>
+  );
 });
 
-SceneContent.displayName = 'SceneContent';
-
 export default function Scene() {
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
-    }, []);
-
-    return (
-        <div className="w-full h-full bg-black">
-            <Canvas
-                camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={isMobile ? [1, 1] : [1, 2]}
-                gl={{
-                    antialias: false,
-                    alpha: false,
-                    powerPreference: "high-performance",
-                    stencil: false,
-                    depth: true,
-                    precision: 'lowp'
-                }}
-            >
-                <SceneContent />
-            </Canvas>
-        </div>
-    );
+  return (
+    <Canvas
+      camera={{ position: [0, 0, 30], fov: 60 }}
+      gl={{ powerPreference: 'high-performance' }}
+    >
+      <SceneContent />
+    </Canvas>
+  );
 }
