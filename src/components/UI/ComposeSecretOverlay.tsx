@@ -35,7 +35,7 @@ export default function ComposeSecretOverlay() {
                 // Open Buy Me A Coffee in a new tab for payment
                 window.open('https://buymeacoffee.com/perunbro', '_blank');
             }
-            addSecret(text, starType === 'supernova', starType, starType === 'supernova' ? selectedColor : undefined);
+            addSecret(text);
             setText('');
             setStarType('standard');
             setError(null);
@@ -45,7 +45,7 @@ export default function ComposeSecretOverlay() {
     if (!isAddingSecret) return null;
 
     return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/95 md:backdrop-blur-2xl animate-fade-in pointer-events-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 md:backdrop-blur-2xl animate-fade-in">
             <div
                 className="w-full max-w-lg bg-black/80 border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden"
             >
