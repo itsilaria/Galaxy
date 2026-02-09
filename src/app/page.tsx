@@ -1,30 +1,61 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { Scene } from "../components/Scene";
 import { SecretModal } from "../components/SecretModal";
 import { useGalaxyStore } from "../components/useGalaxyStore";
 
 const Page: React.FC = () => {
   const fetchSecrets = useGalaxyStore((state) => state.fetchSecrets);
+  const addSecret = useGalaxyStore((state) => state.addSecret);
+  const findMySecret = useGalaxyStore((state) => state.findMySecret);
 
-  useEffect(() => {
-    fetchSecrets(); // carica i segreti appena la pagina monta
+  const [newSecret, setNewSecret] = useState("");
+  const [searchId, setSearchId] = useState("");
+
+  React.useEffect(() => {
+    fetchSecrets();
   }, [fetchSecrets]);
 
   return (
     <div className="h-screen w-screen bg-black relative">
-      {/* Canvas 3D */}
       <Scene />
-
-      {/* Modale dei segreti */}
       <SecretModal />
 
-      {/* Qui puoi aggiungere altri tasti UI sopra il canvas */}
-      <div className="absolute top-4 left-4 z-50 flex gap-2">
+      <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
+        <input
+          type="text"
+          placeholder="Scrivi un nuovo segreto"
+          className="px-2 py-1 rounded"
+          value={newSecret}
+          onChange={(e) => setNewSecret(e.target.value)}
+        />
         <button
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-          onClick={() => alert("Tasto esempio funzionante!")}
+          className="px-4 py-2 bg-green-600 text-white rounded"
+          onClick={() => {
+            if (newSecret.trim() !== "") {
+              addSecret(newSecret);
+              setNewSecret("");
+            }
+          }}
         >
-          Test tasto
+          Aggiungi Segreto
+        </button>
+
+        <input
+          type="text"
+          placeholder="ID segreto da ritrovare"
+          className="px-2 py-1 rounded mt-2"
+          value={searchId}
+          onChange={(e) => setSearchId(e.target.value)}
+        />
+        <button
+          className="px-4 py-2 bg-yellow-600 text-white rounded"
+          onClick={() => {
+            if (searchId.trim() !== "") {
+              findMySecret(searchId);
+            }
+          }}
+        >
+          Ritrova Segreto
         </button>
       </div>
     </div>
