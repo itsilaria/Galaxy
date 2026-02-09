@@ -1,10 +1,12 @@
+"use client";
+
 import { create } from "zustand";
 
 export interface Secret {
   id: string;
   text: string;
   isMock?: boolean;
-  position?: [number, number, number]; // posizione 3D
+  position?: [number, number, number];
 }
 
 interface GalaxyStore {
@@ -27,7 +29,6 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
     try {
       const res = await fetch("/api/secrets");
       const data: Secret[] = await res.json();
-
       const secretsWithPos = data.map((s) => ({
         ...s,
         position: s.position || [
@@ -36,7 +37,6 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
           Math.random() * 10 - 5,
         ],
       }));
-
       set({ secrets: secretsWithPos });
     } catch (err) {
       console.error("Errore fetchSecrets:", err);
@@ -54,13 +54,11 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
           Math.random() * 10 - 5,
         ],
       };
-
       await fetch("/api/secrets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newSecret),
       });
-
       set({ secrets: [...get().secrets, newSecret] });
     } catch (err) {
       console.error("Errore addSecret:", err);
