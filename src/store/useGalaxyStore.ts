@@ -14,6 +14,7 @@ interface GalaxyStore {
   addSecret: (text: string) => Promise<void>;
   selectSecret: (secret: Secret) => void;
   closeModal: () => void;
+  findMySecret: (id: string) => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
@@ -51,5 +52,14 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
 
   closeModal: () => {
     set({ selectedSecret: null, isModalOpen: false });
+  },
+
+  findMySecret: (id: string) => {
+    const secret = get().secrets.find((s) => s.id === id);
+    if (secret) {
+      set({ selectedSecret: secret, isModalOpen: true });
+    } else {
+      alert("Segreto non trovato");
+    }
   },
 }));
