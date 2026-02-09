@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, memo } from 'react';
-import { useGalaxyStore } from '@/store/useGalaxyStore';
+import { useGalaxyStore, Secret } from '@/store/useGalaxyStore';
 
-function Star({ secret }: any) {
+function Star({ secret }: { secret: Secret }) {
   const selectSecret = useGalaxyStore(s => s.selectSecret);
 
   return (
@@ -34,11 +34,13 @@ const StarField = memo(() => {
 
   return (
     <>
-      {secrets.map(secret => (
+      {secrets.map((secret) => (
         <Star key={secret.id} secret={secret} />
       ))}
     </>
   );
 });
+
+StarField.displayName = 'StarField';
 
 export default StarField;
