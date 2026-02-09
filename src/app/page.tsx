@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Scene } from "../components/Scene";
 import { SecretModal } from "../components/SecretModal";
 import { useGalaxyStore } from "../components/useGalaxyStore";
@@ -11,15 +11,21 @@ const Page: React.FC = () => {
   const [newSecret, setNewSecret] = useState("");
   const [searchId, setSearchId] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSecrets();
-  }, [fetchSecrets]);
+
+    // se c'è ?secret=ID nell'URL, apri subito quel segreto
+    const params = new URLSearchParams(window.location.search);
+    const secretId = params.get("secret");
+    if (secretId) findMySecret(secretId);
+  }, [fetchSecrets, findMySecret]);
 
   return (
     <div className="h-screen w-screen bg-black relative">
       <Scene />
       <SecretModal />
 
+      {/* UI tasti */}
       <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
         <input
           type="text"
@@ -50,9 +56,7 @@ const Page: React.FC = () => {
         <button
           className="px-4 py-2 bg-yellow-600 text-white rounded"
           onClick={() => {
-            if (searchId.trim() !== "") {
-              findMySecret(searchId);
-            }
+            if (searchId.trim() !== "") findMySecret(searchId);
           }}
         >
           Ritrova Segreto
