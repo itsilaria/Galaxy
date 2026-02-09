@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import * as THREE from 'three';
 
 export interface Secret {
     id: string;
@@ -84,6 +83,8 @@ const generateMockSecrets = (count: number, lang: SupportedLanguage): Secret[] =
     return secrets;
 };
 
+let languageChangeTimeout: NodeJS.Timeout | null = null;
+
 export const useGalaxyStore = create<GalaxyState>()(
     persist(
         (set) => ({
@@ -99,13 +100,19 @@ export const useGalaxyStore = create<GalaxyState>()(
 
             setHasHydrated: (state) => set({ _hasHydrated: state }),
             setLanguage: (lang) => {
+                // Clear any pending timeout to prevent memory leaks
+                if (languageChangeTimeout) {
+                    clearTimeout(languageChangeTimeout);
+                }
+
                 set({ isWarping: true });
-                setTimeout(() => {
+                languageChangeTimeout = setTimeout(() => {
                     set({
                         currentLanguage: lang,
                         secrets: generateMockSecrets(150, lang),
                         isWarping: false
                     });
+                    languageChangeTimeout = null;
                 }, 1000);
             },
             selectSecret: (secret) => set({ selectedSecret: secret, isModalOpen: !!secret }),

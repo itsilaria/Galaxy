@@ -9,7 +9,7 @@ export default function WelcomeScreen() {
     const t = translations[currentLanguage as keyof typeof translations] as any;
     const [isClosing, setIsClosing] = useState(false);
 
-    if (isStarted && !isClosing) return null;
+    if (isStarted) return null;
 
     const handleEnter = () => {
         setIsClosing(true);

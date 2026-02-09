@@ -1,6 +1,6 @@
 'use client';
 
-import Scene from "@/components/Scene";
+import dynamic from 'next/dynamic';
 import SecretModal from "@/components/UI/SecretModal";
 import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
 import LanguageSelector from "@/components/UI/LanguageSelector";
@@ -13,6 +13,12 @@ import WelcomeScreen from "@/components/UI/WelcomeScreen";
 import BackgroundAudio from "@/components/UI/BackgroundAudio";
 import VisitorCounter from "@/components/UI/VisitorCounter";
 
+// Dynamically import Scene to prevent SSR issues
+const Scene = dynamic(() => import("@/components/Scene"), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-black" />
+});
+
 export default function Home() {
     const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
     const t = translations[currentLanguage as keyof typeof translations];
@@ -20,22 +26,21 @@ export default function Home() {
     return (
         <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
             <WelcomeScreen />
-            <BackgroundAudio />
 
-            <Scene />
-
+            {/* Only render Scene after galaxy is started */}
             {isStarted && (
                 <>
+                    <Scene />
+                    <BackgroundAudio />
                     <SecretModal />
                     <ComposeSecretOverlay />
                     <LanguageSelector />
                     <RandomJumpButton />
                     <SupportButton />
-
                     <VisitorCounter />
 
                     {/* UI Overlay */}
-                    <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-10 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0 animate-fade-in">
+                    <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-50 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0 animate-fade-in">
                         <div className="bg-black/20 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-2 md:p-0 rounded-lg">
                             <h1 className="text-3xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-pink-200 tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] leading-none">
                                 {t.title}
