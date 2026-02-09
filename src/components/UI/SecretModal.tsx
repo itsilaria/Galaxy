@@ -1,69 +1,28 @@
-'use client';
-import { useGalaxyStore } from '@/store/useGalaxyStore';
-import React, { useEffect, useState, useRef } from 'react';
+import React from "react";
+import { useGalaxyStore } from "./useGalaxyStore";
 
-export default function SecretModal() {
-    const { selectedSecret, isModalOpen, closeModal } = useGalaxyStore();
-    const [isVisible, setIsVisible] = useState(false);
-    const openTime = useRef<number>(0);
+export const SecretModal: React.FC = () => {
+  const { selectedSecret, isModalOpen, closeModal } = useGalaxyStore();
 
-    useEffect(() => {
-        if (isModalOpen) {
-            openTime.current = Date.now();
-            setIsVisible(true);
-        } else {
-            const timer = setTimeout(() => setIsVisible(false), 300);
-            return () => clearTimeout(timer);
-        }
-    }, [isModalOpen]);
+  if (!isModalOpen || !selectedSecret) return null;
 
-    if (!isVisible && !isModalOpen) return null;
-
-    const handleBackgroundClick = (e: React.MouseEvent) => {
-        // Prevent accidental closing on mobile immediately after opening
-        if (Date.now() - openTime.current < 400) return;
-        closeModal();
-    };
-
-    return (
-        <div
-            className={`fixed inset-0 z-[110] flex items-center justify-center p-4 transition-opacity duration-300 ${isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-            onPointerUp={(e) => e.stopPropagation()}
-            onClick={handleBackgroundClick}
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={closeModal}
+    >
+      <div
+        className="bg-white p-6 rounded-lg max-w-md w-full relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-gray-800">{selectedSecret.text}</p>
+        <button
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          onClick={closeModal}
         >
-            {/* Premium Glass Effect with solid fallback for mobile stability */}
-            <div
-                className={`absolute inset-0 bg-black/80 md:bg-black/60 md:backdrop-blur-sm border-t md:border border-white/10 md:rounded-2xl transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
-            />
-
-            <div className={`
-                relative bg-black/95 border border-white/10 p-6 md:p-10 rounded-[2.5rem] max-w-[90vw] md:max-w-lg w-full
-                max-h-[80vh] flex flex-col
-                shadow-[0_0_80px_rgba(0,0,0,0.5)] transform transition-all duration-500
-                ${isModalOpen ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-8 opacity-0'}
-            `}>
-                <button
-                    onClick={closeModal}
-                    className="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all z-20"
-                >
-                    ✕
-                </button>
-
-                <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 pt-4">
-                    <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] mb-4 md:mb-6 text-white/30">
-                        Incoming Transmission
-                    </h3>
-                    
-                    <p className="text-lg md:text-3xl font-medium leading-tight italic break-words text-white/80">
-                        "{selectedSecret?.text}"
-                    </p>
-
-                    <div className="mt-8 md:mt-12 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0 text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                        <span>Language: {selectedSecret?.language?.toUpperCase()}</span>
-                        <span>{new Date(selectedSecret?.timestamp || 0).toLocaleDateString()}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
+          Chiudi
+        </button>
+      </div>
+    </div>
+  );
+};
