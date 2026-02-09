@@ -31,7 +31,7 @@ export default function SecretModal() {
 
     return (
         <div
-            className={`fixed inset-0 z-[110] flex items-center justify-center p-4 transition-opacity duration-300 ${isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            className={`fixed inset-0 z-[2100] flex items-center justify-center p-4 transition-opacity duration-300 ${isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
             onPointerUp={(e) => e.stopPropagation()}
             onClick={handleBackgroundClick}
         >

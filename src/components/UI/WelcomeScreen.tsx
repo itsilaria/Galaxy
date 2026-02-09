@@ -20,7 +20,7 @@ export default function WelcomeScreen() {
     };
 
     return (
-        <div className={`fixed inset-0 z-[300] flex flex-col items-center justify-center bg-black transition-all duration-1000 ${isClosing ? 'opacity-0 pointer-events-none scale-110' : 'opacity-100'}`}>
+        <div className={`fixed inset-0 z-[3000] flex flex-col items-center justify-center bg-black transition-all duration-1000 ${isClosing ? 'opacity-0 pointer-events-none scale-110' : 'opacity-100 pointer-events-auto'}`}>
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)] animate-pulse" />
             </div>

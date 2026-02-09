@@ -39,8 +39,13 @@ export default function Home() {
                     <SupportButton />
                     <VisitorCounter />
 
+                    {/* Version Tag for Debugging */}
+                    <div className="fixed top-2 right-2 text-[8px] text-white/5 z-[9999] pointer-events-none">
+                        v1.4.1-stable
+                    </div>
+
                     {/* UI Overlay */}
-                    <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-50 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0 animate-fade-in">
+                    <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-[500] w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0 animate-fade-in">
                         <div className="bg-black/20 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-2 md:p-0 rounded-lg">
                             <h1 className="text-3xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-pink-200 tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] leading-none">
                                 {t.title}
