@@ -1,32 +1,11 @@
-'use client';
+import React, { useEffect } from "react";
+import { useGalaxyStore } from "./useGalaxyStore";
+import { Sphere } from "@react-three/drei";
 
-import { useEffect, memo } from 'react';
-import { useGalaxyStore, Secret } from '@/store/useGalaxyStore';
-
-function Star({ secret }: { secret: Secret }) {
-  const selectSecret = useGalaxyStore(s => s.selectSecret);
-
-  return (
-    <mesh
-      position={secret.position}
-      onPointerDown={(e) => {
-        e.stopPropagation(); // 🔴 FONDAMENTALE
-        selectSecret(secret);
-      }}
-    >
-      <sphereGeometry args={[0.35, 16, 16]} />
-      <meshStandardMaterial
-        color={secret.color}
-        emissive={secret.color}
-        emissiveIntensity={0.6}
-      />
-    </mesh>
-  );
-}
-
-const StarField = memo(() => {
-  const secrets = useGalaxyStore(s => s.secrets);
-  const fetchSecrets = useGalaxyStore(s => s.fetchSecrets);
+export const StarField: React.FC = () => {
+  const secrets = useGalaxyStore((state) => state.secrets);
+  const selectSecret = useGalaxyStore((state) => state.selectSecret);
+  const fetchSecrets = useGalaxyStore((state) => state.fetchSecrets);
 
   useEffect(() => {
     fetchSecrets();
@@ -34,13 +13,19 @@ const StarField = memo(() => {
 
   return (
     <>
-      {secrets.map((secret) => (
-        <Star key={secret.id} secret={secret} />
+      {secrets.map((secret, i) => (
+        <Sphere
+          key={secret.id}
+          args={[0.2, 16, 16]}
+          position={[Math.random() * 10 - 5, Math.random() * 5, Math.random() * 10 - 5]}
+          onPointerDown={(e) => {
+            e.stopPropagation(); // evita che il canvas intercetti
+            selectSecret(secret);
+          }}
+        >
+          <meshStandardMaterial color={secret.isMock ? "gray" : "yellow"} />
+        </Sphere>
       ))}
     </>
   );
-});
-
-StarField.displayName = 'StarField';
-
-export default StarField;
+};
