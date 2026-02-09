@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Scene } from "../components/Scene";
 import { SecretModal } from "../components/SecretModal";
@@ -14,10 +16,11 @@ const Page: React.FC = () => {
   useEffect(() => {
     fetchSecrets();
 
-    // se c'è ?secret=ID nell'URL, apri subito quel segreto
-    const params = new URLSearchParams(window.location.search);
-    const secretId = params.get("secret");
-    if (secretId) findMySecret(secretId);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const secretId = params.get("secret");
+      if (secretId) findMySecret(secretId);
+    }
   }, [fetchSecrets, findMySecret]);
 
   return (
@@ -25,7 +28,6 @@ const Page: React.FC = () => {
       <Scene />
       <SecretModal />
 
-      {/* UI tasti */}
       <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
         <input
           type="text"
