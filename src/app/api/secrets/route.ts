@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 
 function getRedis() {
-  try {
-    return Redis.fromEnv();
-  } catch {
+  const url = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+  if (!url || !token) {
     return null;
   }
+  return new Redis({ url, token });
 }
 
 export async function GET() {
