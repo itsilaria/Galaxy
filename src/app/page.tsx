@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useGalaxyStore } from "@/store/useGalaxyStore";
 import { SecretModal } from "@/components/UI/SecretModal";
@@ -20,7 +20,6 @@ const Scene = dynamic(
 );
 
 export default function Page() {
-  const fetchSecrets = useGalaxyStore((state) => state.fetchSecrets);
   const findMySecret = useGalaxyStore((state) => state.findMySecret);
   const isStarted = useGalaxyStore((state) => state.isStarted);
   const startAddingSecret = useGalaxyStore((state) => state.startAddingSecret);
@@ -28,10 +27,7 @@ export default function Page() {
   const secrets = useGalaxyStore((state) => state.secrets);
   const t = translations[currentLanguage as keyof typeof translations] as Record<string, string>;
 
-  useEffect(() => {
-    fetchSecrets();
-  }, [fetchSecrets]);
-
+  // Deep-link: open a specific secret if ?secret=ID is in the URL
   useEffect(() => {
     if (typeof window !== "undefined" && secrets.length > 0) {
       const params = new URLSearchParams(window.location.search);

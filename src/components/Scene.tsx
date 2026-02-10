@@ -28,6 +28,7 @@ export const Scene: React.FC = () => {
           fade
           speed={0.5}
         />
+        {/* GalaxyEffects renders all secret stars (clickable) and handles pulsing animation */}
         <GalaxyEffects />
       </Suspense>
       <CameraController />

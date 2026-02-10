@@ -30,6 +30,14 @@ interface GalaxyStore {
   setLanguage: (lang: string) => void;
 }
 
+function generatePosition(): [number, number, number] {
+  return [
+    (Math.random() - 0.5) * 30,
+    (Math.random() - 0.5) * 20,
+    (Math.random() - 0.5) * 30,
+  ];
+}
+
 export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
   secrets: [],
   selectedSecret: null,
@@ -44,21 +52,21 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
       const res = await fetch("/api/secrets");
       if (!res.ok) throw new Error("Failed to fetch");
       const data: Secret[] = await res.json();
+
+      // Ensure all secrets have positions
       const secretsWithPos = data.map((s) => ({
         ...s,
-        position: s.position || [
-          (Math.random() - 0.5) * 30,
-          (Math.random() - 0.5) * 20,
-          (Math.random() - 0.5) * 30,
-        ] as [number, number, number],
+        position: (s.position && Array.isArray(s.position) && s.position.length === 3)
+          ? s.position as [number, number, number]
+          : generatePosition(),
       }));
+
       set({ secrets: secretsWithPos });
     } catch (err) {
       console.error("Error fetchSecrets:", err);
-      // Provide mock secrets as fallback so the galaxy isn't empty
-      const mockSecrets: Secret[] = Array.from({ length: 20 }, (_, i) => ({
-        id: `mock-${i}`,
-        text: [
+      // Only use mock fallback if there are no secrets already loaded
+      if (get().secrets.length === 0) {
+        const mockTexts = [
           "I still think about that moment every day...",
           "Nobody knows I cried that night.",
           "I pretend to be happy but I'm not.",
@@ -74,44 +82,62 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
           "I secretly love rainy days.",
           "I miss who I used to be.",
           "Music saved my life.",
-          "I dream in colors.",
-          "My heart is heavier than it looks.",
-          "I believe in second chances.",
-          "The universe hears me.",
-          "I'm still learning to let go.",
-        ][i],
-        isMock: true,
-        position: [
-          (Math.random() - 0.5) * 30,
-          (Math.random() - 0.5) * 20,
-          (Math.random() - 0.5) * 30,
-        ] as [number, number, number],
-      }));
-      set({ secrets: mockSecrets });
+        ];
+        const mockSecrets: Secret[] = mockTexts.map((text, i) => ({
+          id: `mock-${i}`,
+          text,
+          isMock: true,
+          position: generatePosition(),
+        }));
+        set({ secrets: mockSecrets });
+      }
     }
   },
 
   addSecret: async (text: string, color?: string, isSupernova?: boolean): Promise<void> => {
+    const newSecret: Secret = {
+      id: Date.now().toString(),
+      text,
+      color,
+      isSupernova,
+      position: generatePosition(),
+    };
+
     try {
-      const newSecret: Secret = {
-        id: Date.now().toString(),
-        text,
-        color,
-        isSupernova,
-        position: [
-          (Math.random() - 0.5) * 30,
-          (Math.random() - 0.5) * 20,
-          (Math.random() - 0.5) * 30,
-        ] as [number, number, number],
-      };
-      await fetch("/api/secrets", {
+      const res = await fetch("/api/secrets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newSecret),
       });
-      set({ secrets: [...get().secrets, newSecret], isAddingSecret: false });
+
+      if (res.ok) {
+        const saved = await res.json();
+        // Use server-returned data (which has the saved position)
+        const savedSecret: Secret = {
+          ...newSecret,
+          ...saved,
+          position: (saved.position && Array.isArray(saved.position) && saved.position.length === 3)
+            ? saved.position as [number, number, number]
+            : newSecret.position,
+        };
+        set({
+          secrets: [...get().secrets, savedSecret],
+          isAddingSecret: false,
+        });
+      } else {
+        // Even if API fails, add locally so user sees their star
+        set({
+          secrets: [...get().secrets, newSecret],
+          isAddingSecret: false,
+        });
+      }
     } catch (err) {
       console.error("Error addSecret:", err);
+      // Add locally as fallback
+      set({
+        secrets: [...get().secrets, newSecret],
+        isAddingSecret: false,
+      });
     }
   },
 
