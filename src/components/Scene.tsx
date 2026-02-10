@@ -13,6 +13,7 @@ export const Scene: React.FC = () => {
       style={{ position: "absolute", inset: 0 }}
       gl={{ antialias: true, alpha: false }}
       dpr={[1, 1.5]}
+      touch-action="none"
     >
       <color attach="background" args={["#000000"]} />
       <ambientLight intensity={0.3} />
@@ -22,13 +23,12 @@ export const Scene: React.FC = () => {
         <Stars
           radius={80}
           depth={60}
-          count={4000}
+          count={3000}
           factor={4}
           saturation={0}
           fade
           speed={0.5}
         />
-        {/* GalaxyEffects renders all secret stars (clickable) and handles pulsing animation */}
         <GalaxyEffects />
       </Suspense>
       <CameraController />
@@ -43,6 +43,10 @@ export const Scene: React.FC = () => {
         enableDamping
         dampingFactor={0.05}
         makeDefault
+        touches={{
+          ONE: 1, // ROTATE
+          TWO: 4, // DOLLY_ROTATE
+        }}
       />
     </Canvas>
   );
