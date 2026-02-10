@@ -1,18 +1,53 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
-import { GalaxyEffects } from "./GalaxyEffects";
+import { GalaxyEffects } from "@/components/GalaxyEffects";
+import CameraController from "@/components/Galaxy/CameraController";
 
 export const Scene: React.FC = () => {
   return (
-    <Canvas camera={{ position: [0, 0, 10], fov: 75 }}>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} />
-      <Stars radius={50} depth={50} count={5000} factor={4} saturation={0} fade />
-      <GalaxyEffects />
-      <OrbitControls enablePan enableZoom enableRotate />
+    <Canvas
+      camera={{ position: [0, 0, 20], fov: 75 }}
+      style={{ position: "absolute", inset: 0 }}
+      gl={{ antialias: true, alpha: false }}
+      dpr={[1, 1.5]}
+      touch-action="none"
+    >
+      <color attach="background" args={["#000000"]} />
+      <ambientLight intensity={0.3} />
+      <pointLight position={[10, 10, 10]} intensity={0.5} />
+      <pointLight position={[-10, -10, -10]} intensity={0.3} color="#4444ff" />
+      <Suspense fallback={null}>
+        <Stars
+          radius={80}
+          depth={60}
+          count={3000}
+          factor={4}
+          saturation={0}
+          fade
+          speed={0.5}
+        />
+        <GalaxyEffects />
+      </Suspense>
+      <CameraController />
+      <OrbitControls
+        enablePan
+        enableZoom
+        enableRotate
+        autoRotate
+        autoRotateSpeed={0.3}
+        maxDistance={60}
+        minDistance={5}
+        enableDamping
+        dampingFactor={0.05}
+        makeDefault
+        touches={{
+          ONE: 1, // ROTATE
+          TWO: 4, // DOLLY_ROTATE
+        }}
+      />
     </Canvas>
   );
 };

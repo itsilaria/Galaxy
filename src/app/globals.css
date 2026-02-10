@@ -1,19 +1,31 @@
 @import "tailwindcss";
 
-:root {
-  --background: #000000;
-  --foreground: #ffffff;
-  /* Defined manually instead of @theme */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: Consolas, "Courier New", monospace;
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', Consolas, "Courier New", monospace;
+  --color-background: #000000;
+  --color-foreground: #ffffff;
 }
 
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent overscroll bounce on mobile */
+html {
+  overscroll-behavior: none;
 }
 
 /* Custom Animations */
@@ -22,7 +34,6 @@ body {
     opacity: 0;
     transform: scale(0.95);
   }
-
   to {
     opacity: 1;
     transform: scale(1);
@@ -33,28 +44,19 @@ body {
   animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.glow-hover:hover {
-  box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
-  /* Purple glow */
-}
-
-/* Scrollbar hide for textareas */
+/* Scrollbar styling for textareas */
 textarea {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 @keyframes shake {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: translateX(0);
   }
-
   25% {
     transform: translateX(-5px);
   }
-
   75% {
     transform: translateX(5px);
   }
@@ -69,7 +71,6 @@ textarea {
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -78,4 +79,10 @@ textarea {
 
 .animate-slide-up {
   animation: slideUp 0.5s ease-out forwards;
+}
+
+/* WebGL canvas should fill its container */
+canvas {
+  display: block;
+  touch-action: none;
 }

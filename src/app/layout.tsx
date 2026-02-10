@@ -1,21 +1,37 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ErrorBoundary from "@/components/UI/ErrorBoundary";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const _geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const _geistMono = Geist_Mono({
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#000000",
+};
 
 export const metadata: Metadata = {
   title: "The Galaxy of Secrets | An Anonymous Confession Universe",
-  description: "Share your deepest secrets anonymously in a beautiful 3D galaxy. Watch your confession become a star in the constellation of human mysteries.",
-  keywords: ["secrets", "anonymous confessions", "3D galaxy", "interactive art", "mystery", "segreti", "anonimo"],
+  description:
+    "Share your deepest secrets anonymously in a beautiful 3D galaxy. Watch your confession become a star in the constellation of human mysteries.",
+  keywords: [
+    "secrets",
+    "anonymous confessions",
+    "3D galaxy",
+    "interactive art",
+    "mystery",
+    "segreti",
+    "anonimo",
+  ],
   authors: [{ name: "The Galaxy Explorer" }],
   openGraph: {
     title: "The Galaxy of Secrets",
@@ -42,8 +58,6 @@ export const metadata: Metadata = {
   },
 };
 
-import ErrorBoundary from "@/components/UI/ErrorBoundary";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -51,14 +65,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
+      <body className="antialiased font-sans">
+        <ErrorBoundary>{children}</ErrorBoundary>
       </body>
     </html>
   );
 }
-
