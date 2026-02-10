@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useGalaxyStore } from "./useGalaxyStore";
+import { useGalaxyStore } from "@/store/useGalaxyStore";
 import { Sphere } from "@react-three/drei";
 import { MeshStandardMaterial } from "three";
 

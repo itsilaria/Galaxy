@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGalaxyStore } from "./useGalaxyStore";
+import { useGalaxyStore } from "@/store/useGalaxyStore";
 import { Vector3, Mesh } from "three";
 
 export const GalaxyEffects: React.FC = () => {
@@ -14,13 +14,14 @@ export const GalaxyEffects: React.FC = () => {
     secrets.forEach((secret) => {
       const mesh = refs.current[secret.id];
       if (mesh) {
-        const scale = 1 + Math.sin(Date.now() / 500 + parseInt(secret.id)) * 0.2;
-        mesh.scale.set(scale, scale, scale);
-
-        const target = new Vector3(0, 0, 0);
-        const pos = mesh.position.clone();
-        const dir = target.sub(pos).multiplyScalar(0.002);
-        mesh.position.add(dir);
+        const scale =
+          1 + Math.sin(Date.now() / 500 + parseInt(secret.id) || 0) * 0.2;
+        const baseScale = secret.isSupernova ? 1.5 : 1;
+        mesh.scale.set(
+          scale * baseScale,
+          scale * baseScale,
+          scale * baseScale
+        );
       }
     });
   });
@@ -31,7 +32,7 @@ export const GalaxyEffects: React.FC = () => {
         <mesh
           key={secret.id}
           ref={(el) => {
-            if (el) refs.current[secret.id] = el!;
+            if (el) refs.current[secret.id] = el;
           }}
           position={secret.position}
           onPointerDown={(e) => {
@@ -39,14 +40,13 @@ export const GalaxyEffects: React.FC = () => {
             selectSecret(secret);
           }}
         >
-          <sphereGeometry args={[0.25, 16, 16]} />
+          <sphereGeometry args={[secret.isSupernova ? 0.4 : 0.25, 16, 16]} />
           <meshStandardMaterial
-            color={secret.isMock ? "gray" : "yellow"}
-            emissive={secret.isMock ? "gray" : "yellow"}
-            emissiveIntensity={0.7}
+            color={secret.color || (secret.isMock ? "#888888" : "#ffd700")}
+            emissive={secret.color || (secret.isMock ? "#888888" : "#ffd700")}
+            emissiveIntensity={secret.isSupernova ? 1.2 : 0.7}
             transparent
-            opacity={0}
-            onUpdate={(self) => (self.opacity = 1)}
+            opacity={0.9}
           />
         </mesh>
       ))}
