@@ -22,6 +22,7 @@ export const translations = {
         colorPink: "Neon Pink",
         colorGreen: "Emerald",
         sendPremium: "Launch Supernova",
+        copyLink: "Copy Link",
         footer: "Exo-Galaxy Project • Global Edition"
     },
     it: {
@@ -47,6 +48,7 @@ export const translations = {
         colorPink: "Rosa Neon",
         colorGreen: "Smeraldo",
         sendPremium: "Lancia Supernova",
+        copyLink: "Copia Link",
         footer: "Progetto Exo-Galaxy • Edizione Globale"
     },
     es: {
@@ -62,6 +64,7 @@ export const translations = {
         support: "Apoya la Galaxia",
         premiumTitle: "🌟 Conviértete en Supernova",
         premiumDesc: "Haz tu estrella más grande y brillante para siempre.",
+        copyLink: "Copiar Enlace",
         footer: "Proyecto Exo-Galaxy • Edición Global"
     },
     fr: {
@@ -77,6 +80,7 @@ export const translations = {
         support: "Soutenez la Galaxie",
         premiumTitle: "🌟 Devenez une Supernova",
         premiumDesc: "Rendez votre étoile plus grande et plus brillante pour toujours.",
+        copyLink: "Copier le Lien",
         footer: "Projet Exo-Galaxy • Édition Mondiale"
     },
     de: {
@@ -92,6 +96,7 @@ export const translations = {
         support: "Unterstütze die Galaxie",
         premiumTitle: "🌟 Werden Sie zur Supernova",
         premiumDesc: "Machen Sie Ihren Stern für immer größer und hellere.",
+        copyLink: "Link Kopieren",
         footer: "Exo-Galaxy Projekt • Global Edition"
     },
     jp: {
@@ -107,6 +112,7 @@ export const translations = {
         support: "銀河をサポートする",
         premiumTitle: "🌟 超新星になる",
         premiumDesc: "あなたの星を永遠に大きく、明るくしましょう。",
+        copyLink: "リンクをコピー",
         footer: "Exo-Galaxy プロジェクト • グローバル版"
     }
 };

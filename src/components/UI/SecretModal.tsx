@@ -1,13 +1,56 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useGalaxyStore } from "@/store/useGalaxyStore";
 import { translations } from "@/utils/translations";
 
 export const SecretModal: React.FC = () => {
   const { selectedSecret, isModalOpen, closeModal, currentLanguage } =
     useGalaxyStore();
-  const t = translations[currentLanguage as keyof typeof translations] as Record<string, string>;
+  const t = translations[
+    currentLanguage as keyof typeof translations
+  ] as Record<string, string>;
+
+  const [translatedText, setTranslatedText] = useState<string>("");
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  // Translate the secret text whenever the modal opens or the language changes
+  useEffect(() => {
+    if (!isModalOpen || !selectedSecret) {
+      setTranslatedText("");
+      return;
+    }
+
+    let cancelled = false;
+    setIsTranslating(true);
+
+    fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: selectedSecret.text,
+        targetLang: currentLanguage,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) {
+          setTranslatedText(data.translated || selectedSecret.text);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTranslatedText(selectedSecret.text);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsTranslating(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isModalOpen, selectedSecret, currentLanguage]);
 
   if (!isModalOpen || !selectedSecret) return null;
 
@@ -29,9 +72,22 @@ export const SecretModal: React.FC = () => {
           {t.modalTitle || "Incoming Transmission"}
         </div>
 
-        <p className="text-white text-lg italic tracking-tight leading-relaxed mb-6">
-          {selectedSecret.text}
+        <p className="text-white text-lg italic tracking-tight leading-relaxed mb-2">
+          {isTranslating ? (
+            <span className="text-white/40 animate-pulse">{"..."}</span>
+          ) : (
+            translatedText || selectedSecret.text
+          )}
         </p>
+
+        {/* Show original text if it differs from the translated version */}
+        {!isTranslating &&
+          translatedText &&
+          translatedText !== selectedSecret.text && (
+            <p className="text-white/25 text-xs italic mb-4">
+              {selectedSecret.text}
+            </p>
+          )}
 
         {selectedSecret.isMock && (
           <div className="text-[10px] text-white/20 uppercase tracking-widest mb-4">
@@ -39,7 +95,7 @@ export const SecretModal: React.FC = () => {
           </div>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 mt-6">
           <button
             className="flex-1 py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all text-xs uppercase tracking-widest font-bold"
             onClick={closeModal}
@@ -53,7 +109,7 @@ export const SecretModal: React.FC = () => {
                 navigator.clipboard.writeText(shareUrl);
             }}
           >
-            Copy Link
+            {t.copyLink || "Copy Link"}
           </button>
         </div>
       </div>
