@@ -1,97 +1,63 @@
-"use client";
+'use client';
+import Scene from "@/components/Scene";
+import MobileStarField from "@/components/MobileStarField";
+import SecretModal from "@/components/UI/SecretModal";
+import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
+import LanguageSelector from "@/components/UI/LanguageSelector";
+import RandomJumpButton from "@/components/UI/RandomJumpButton";
+import SupportButton from "@/components/UI/SupportButton";
+import { useGalaxyStore } from "@/store/useGalaxyStore";
+import { translations } from "@/utils/translations";
+import WelcomeScreen from "@/components/UI/WelcomeScreen";
+import BackgroundAudio from "@/components/UI/BackgroundAudio";
+import VisitorCounter from "@/components/UI/VisitorCounter";
+import { useState, useEffect } from "react";
 
-import React, { useEffect, useState } from "react";
-import { Scene } from "../components/Scene";
-import { SecretModal } from "../components/SecretModal";
-import { useGalaxyStore } from "../components/useGalaxyStore";
-
-const Page: React.FC = () => {
-  const fetchSecrets = useGalaxyStore((state) => state.fetchSecrets);
-  const addSecret = useGalaxyStore((state) => state.addSecret);
-  const findMySecret = useGalaxyStore((state) => state.findMySecret);
-
-  const [newSecret, setNewSecret] = useState("");
-  const [searchId, setSearchId] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentSecretId, setCurrentSecretId] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchSecrets();
-
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const secretId = params.get("secret");
-      if (secretId) {
-        findMySecret(secretId);
-        setIsModalOpen(true); // apri il modale se trovi il segreto
-        setCurrentSecretId(secretId);
-      }
-    }
-  }, [fetchSecrets, findMySecret]);
-
-  // Funzione per aprire il modale
-  const handleOpenModal = (secretId: string) => {
-    findMySecret(secretId);
-    setIsModalOpen(true);
-    setCurrentSecretId(secretId);
-  };
-
-  // Funzione per chiudere il modale
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setCurrentSecretId(null);
-  };
-
-  return (
-    <div className="h-screen w-screen bg-black relative font-sans">
-      <Scene />
-
-      {/* Gestione del modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <SecretModal secretId={currentSecretId!} onClose={handleCloseModal} />
-        </div>
-      )}
-
-      {/* Pannello di input */}
-      <div className="absolute top-4 left-4 z-50 flex flex-col gap-3 bg-gray-900 p-4 rounded-lg shadow-lg max-w-sm w-full">
-        <input
-          type="text"
-          placeholder="Scrivi un nuovo segreto"
-          className="px-4 py-3 rounded-lg w-full text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          value={newSecret}
-          onChange={(e) => setNewSecret(e.target.value)}
-        />
-        <button
-          className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg transition duration-200"
-          onClick={() => {
-            if (newSecret.trim() !== "") {
-              addSecret(newSecret);
-              setNewSecret("");
-            }
-          }}
-        >
-          Aggiungi Segreto
-        </button>
-
-        <input
-          type="text"
-          placeholder="ID segreto da ritrovare"
-          className="px-4 py-3 rounded-lg w-full text-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 mt-2"
-          value={searchId}
-          onChange={(e) => setSearchId(e.target.value)}
-        />
-        <button
-          className="px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold text-lg transition duration-200"
-          onClick={() => {
-            if (searchId.trim() !== "") handleOpenModal(searchId);
-          }}
-        >
-          Ritrova Segreto
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default Page;
+export default function Home() {
+    const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
+    const t = translations[currentLanguage as keyof typeof translations];
+    const [isMobile, setIsMobile] = useState(false);
+    
+    useEffect(() => {
+        const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        setIsMobile(mobile);
+    }, []);
+    
+    return (
+        <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
+            <WelcomeScreen />
+            <BackgroundAudio />
+            {!isMobile ? <Scene /> : <MobileStarField />}
+            {isStarted && (
+                <>
+                    <SecretModal />
+                    <ComposeSecretOverlay />
+                    <LanguageSelector />
+                    <RandomJumpButton />
+                    <SupportButton />
+                    <VisitorCounter />
+                    {/* UI Overlay */}
+                    <div className="absolute top-0 left-0 p-4 md:p-8 pointer-events-none z-10 w-full flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0 animate-fade-in">
+                        <div className="bg-black/20 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-2 md:p-0 rounded-lg">
+                            <h1 className="text-3xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-pink-200 tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] leading-none">
+                                {t.title}
+                            </h1>
+                            <p className="text-white/60 text-[10px] md:text-base mt-1 md:mt-2 max-w-[200px] md:max-w-md leading-relaxed">
+                                {t.subtitle}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => startAddingSecret()}
+                            className="pointer-events-auto bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-xl text-white px-6 md:px-8 py-2 md:py-3 rounded-full border border-white/20 transition-all text-xs md:text-base font-medium glow-hover shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                        >
+                            {t.button}
+                        </button>
+                    </div>
+                    <div className="absolute bottom-4 md:bottom-8 right-4 md:right-8 pointer-events-none text-white/10 text-[8px] md:text-xs tracking-widest uppercase">
+                        {t.footer}
+                    </div>
+                </>
+            )}
+        </main>
+    );
+}
