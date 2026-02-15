@@ -1,39 +1,65 @@
-import React, { useEffect } from "react";
-import { useGalaxyStore } from "./useGalaxyStore";
-import { Sphere } from "@react-three/drei";
-import { MeshStandardMaterial } from "three";
+'use client';
+import { useRef, useMemo, memo, useEffect } from 'react';
+import * as THREE from 'three';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
+import { useGalaxyStore } from '@/store/useGalaxyStore';
 
-export const StarField: React.FC = () => {
-  const secrets = useGalaxyStore((state) => state.secrets);
-  const selectSecret = useGalaxyStore((state) => state.selectSecret);
-  const fetchSecrets = useGalaxyStore((state) => state.fetchSecrets);
+const COLOR_WHITE = new THREE.Color('#ffffff');
+
+export default function StarField() {
+  const visualMeshRef = useRef<THREE.InstancedMesh>(null);
+  const hitMeshRef = useRef<THREE.InstancedMesh>(null);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const secrets = useGalaxyStore(s => s.secrets);
+  const selectSecret = useGalaxyStore(s => s.selectSecret);
 
   useEffect(() => {
-    fetchSecrets();
-  }, [fetchSecrets]);
+    if (!visualMeshRef.current || !hitMeshRef.current) return;
+
+    secrets.forEach((secret, i) => {
+      dummy.position.set(...secret.position);
+      dummy.updateMatrix();
+      visualMeshRef.current!.setMatrixAt(i, dummy.matrix);
+      hitMeshRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+
+    visualMeshRef.current.instanceMatrix.needsUpdate = true;
+    hitMeshRef.current.instanceMatrix.needsUpdate = true;
+  }, [secrets, dummy]);
+
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+    if (e.instanceId !== undefined && secrets[e.instanceId]) {
+      console.log('Clicked star:', e.instanceId, secrets[e.instanceId]);
+      selectSecret(secrets[e.instanceId]);
+    }
+  };
+
+  // Don't render if no secrets
+  if (!secrets || secrets.length === 0) {
+    return null;
+  }
 
   return (
-    <>
-      {secrets.map((secret) => (
-        <Sphere
-          key={secret.id}
-          args={[0.25, 16, 16]}
-          position={secret.position}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            selectSecret(secret);
-          }}
-        >
-          <meshStandardMaterial
-            color={secret.isMock ? "gray" : "yellow"}
-            emissive={secret.isMock ? "gray" : "yellow"}
-            emissiveIntensity={0.5}
-            transparent
-            opacity={0}
-            onUpdate={(self: MeshStandardMaterial) => (self.opacity = 1)}
-          />
-        </Sphere>
-      ))}
-    </>
+    <group>
+      {/* INTERACTION LAYER - Hitbox MOLTO più grande */}
+      <instancedMesh
+        ref={hitMeshRef}
+        args={[undefined, undefined, secrets.length]}
+        onClick={handleClick}
+      >
+        <sphereGeometry args={[6, 8, 8]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </instancedMesh>
+
+      {/* VISUAL LAYER - Stelle MOLTO più grandi e visibili */}
+      <instancedMesh
+        ref={visualMeshRef}
+        args={[undefined, undefined, secrets.length]}
+      >
+        <sphereGeometry args={[3, 16, 16]} />
+        <meshBasicMaterial color={COLOR_WHITE} />
+      </instancedMesh>
+    </group>
   );
-};
+}
