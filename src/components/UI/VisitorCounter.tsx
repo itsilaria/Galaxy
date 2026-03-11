@@ -7,7 +7,13 @@ import { translations } from '@/utils/translations';
 const VisitorCounter = memo(() => {
     const { visitorCount, currentLanguage } = useGalaxyStore();
     const t = translations[currentLanguage as keyof typeof translations] || translations.en;
-    const [liveVisitors, setLiveVisitors] = useState(visitorCount || 150);
+    const [liveVisitors, setLiveVisitors] = useState(150);
+    
+    useEffect(() => {
+        if (visitorCount) {
+            setLiveVisitors(visitorCount);
+        }
+    }, [visitorCount]);
 
     useEffect(() => {
         const interval = setInterval(() => {

@@ -14,14 +14,16 @@ import VisitorCounter from "@/components/UI/VisitorCounter";
 import { useState, useEffect } from "react";
 
 export default function Home() {
-    const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
+    const { startAddingSecret, currentLanguage, isStarted, fetchSecrets } = useGalaxyStore();
     const t = translations[currentLanguage as keyof typeof translations] || translations.en;
     const [isMobile, setIsMobile] = useState(false);
     
     useEffect(() => {
         const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
         setIsMobile(mobile);
-    }, []);
+        // Fetch secrets on mount
+        fetchSecrets();
+    }, [fetchSecrets]);
     
     return (
         <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">

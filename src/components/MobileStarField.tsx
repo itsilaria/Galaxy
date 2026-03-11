@@ -23,19 +23,31 @@ export default function MobileStarField() {
     resize();
     window.addEventListener('resize', resize);
 
-    // Create stars from secrets
-    starsRef.current = secrets.map((secret, i) => {
-      // Map 3D positions to 2D canvas
-      const x = ((secret.position[0] + 500) / 1000) * canvas.width;
-      const y = ((secret.position[1] + 500) / 1000) * canvas.height;
-      return {
-        x,
-        y,
-        size: 2 + Math.random() * 2,
-        secretIndex: i,
+    // Create stars from secrets (or generate random positions if no secrets)
+    if (secrets.length > 0) {
+      starsRef.current = secrets.map((secret, i) => {
+        // Map 3D positions to 2D canvas - use default position if not set
+        const pos = secret.position || [Math.random() * 10 - 5, Math.random() * 5, Math.random() * 10 - 5];
+        const x = ((pos[0] + 5) / 10) * canvas.width;
+        const y = ((pos[1] + 2.5) / 7.5) * canvas.height;
+        return {
+          x: Math.max(20, Math.min(canvas.width - 20, x)),
+          y: Math.max(20, Math.min(canvas.height - 20, y)),
+          size: 3 + Math.random() * 2,
+          secretIndex: i,
+          twinkle: Math.random() * Math.PI * 2
+        };
+      });
+    } else {
+      // Create placeholder stars if no secrets loaded yet
+      starsRef.current = Array.from({ length: 30 }, (_, i) => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: 3 + Math.random() * 2,
+        secretIndex: -1,
         twinkle: Math.random() * Math.PI * 2
-      };
-    });
+      }));
+    }
 
     // Add some background stars for atmosphere
     const bgStars: { x: number; y: number; size: number; twinkle: number }[] = [];
@@ -100,25 +112,37 @@ export default function MobileStarField() {
     };
   }, [secrets]);
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleInteraction = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
-    // Find clicked star
-    const clickRadius = 30; // Touch-friendly radius
+    // Find clicked/tapped star
+    const clickRadius = 40; // Touch-friendly radius
     for (const star of starsRef.current) {
       const dx = x - star.x;
       const dy = y - star.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       
-      if (dist < clickRadius && secrets[star.secretIndex]) {
+      if (dist < clickRadius && star.secretIndex >= 0 && secrets[star.secretIndex]) {
         selectSecret(secrets[star.secretIndex]);
         break;
       }
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handleInteraction(e.clientX, e.clientY);
+  };
+
+  const handleTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (touch) {
+      handleInteraction(touch.clientX, touch.clientY);
     }
   };
 
@@ -126,8 +150,9 @@ export default function MobileStarField() {
     <canvas
       ref={canvasRef}
       onClick={handleClick}
-      className="absolute inset-0 w-full h-full touch-none"
-      style={{ touchAction: 'none' }}
+      onTouchStart={handleTouch}
+      className="absolute inset-0 w-full h-full"
+      style={{ touchAction: 'manipulation' }}
     />
   );
 }
