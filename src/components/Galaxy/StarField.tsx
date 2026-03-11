@@ -1,24 +1,20 @@
 'use client';
-
-import { useRef, useMemo, memo, useEffect, useState } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { useGalaxyStore, Secret } from '@/store/useGalaxyStore';
+import { useGalaxyStore } from '@/store/useGalaxyStore';
 
 const COLOR_WHITE = new THREE.Color('#ffffff');
 
 export default function StarField() {
-    const secrets = useGalaxyStore((state) => state.secrets);
+    const secrets = useGalaxyStore(s => s.secrets);
     const selectSecret = useGalaxyStore(s => s.selectSecret);
     const selectedId = useGalaxyStore(s => s.selectedSecret?.id);
 
     const hitMeshRef = useRef<THREE.InstancedMesh>(null!);
     const visualMeshRef = useRef<THREE.InstancedMesh>(null!);
     const dummy = useMemo(() => new THREE.Object3D(), []);
-    const colors = useMemo(() => secrets.map(s => new THREE.Color(s.color)), [secrets]);
-
-    // Tracking per evitare click accidentali durante lo scroll
-    const [pointerDownPos, setPointerDownPos] = useState<{ x: number; y: number } | null>(null);
+    const colors = useMemo(() => secrets.map(s => new THREE.Color(s.color || '#ffffff')), [secrets]);
 
     useEffect(() => {
         if (!visualMeshRef.current || !hitMeshRef.current || secrets.length === 0) return;
@@ -29,7 +25,9 @@ export default function StarField() {
             dummy.updateMatrix();
             visualMeshRef.current.setMatrixAt(i, dummy.matrix);
             hitMeshRef.current.setMatrixAt(i, dummy.matrix);
-            visualMeshRef.current.setColorAt(i, colors[i]);
+            if (visualMeshRef.current.instanceColor) {
+                visualMeshRef.current.setColorAt(i, colors[i]);
+            }
         });
 
         visualMeshRef.current.instanceMatrix.needsUpdate = true;
@@ -44,10 +42,8 @@ export default function StarField() {
         for (let i = 0; i < secrets.length; i++) {
             const star = secrets[i];
             const isSelected = selectedId === star.id;
-
-            // Pulsazione e scala
-            const pulse = 1 + Math.sin(t * 2 + (i * 0.1)) * 0.15;
-            const scale = isSelected ? 4.0 : pulse;
+            const pulse = 1 + Math.sin(t * 2 + i * 0.37) * 0.18;
+            const scale = isSelected ? 3.5 : pulse;
 
             dummy.position.set(...star.position);
             dummy.scale.setScalar(scale);
@@ -55,7 +51,9 @@ export default function StarField() {
             visualMeshRef.current.setMatrixAt(i, dummy.matrix);
             hitMeshRef.current.setMatrixAt(i, dummy.matrix);
 
-            visualMeshRef.current.setColorAt(i, isSelected ? COLOR_WHITE : colors[i]);
+            if (visualMeshRef.current.instanceColor) {
+                visualMeshRef.current.setColorAt(i, isSelected ? COLOR_WHITE : colors[i]);
+            }
         }
         visualMeshRef.current.instanceMatrix.needsUpdate = true;
         hitMeshRef.current.instanceMatrix.needsUpdate = true;
@@ -69,31 +67,28 @@ export default function StarField() {
         }
     };
 
-    if (secrets.length === 0) return null;
+    if (!secrets || secrets.length === 0) return null;
 
     return (
         <group>
-            {/* LAYER DI INTERAZIONE - Sfere trasparenti grandi per facilitare il touch */}
+            {/* Transparent hit-mesh — big spheres for easy click/tap */}
             <instancedMesh
                 ref={hitMeshRef}
-                args={[null as any, null as any, secrets.length]}
+                args={[undefined, undefined, secrets.length]}
                 onClick={handleClick}
             >
-                <sphereGeometry args={[4.0, 8, 8]} />
+                <sphereGeometry args={[5, 8, 8]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </instancedMesh>
 
-            {/* LAYER VISIVO - Sfere luminose */}
+            {/* Visual star mesh */}
             <instancedMesh
                 ref={visualMeshRef}
-                args={[null as any, null as any, secrets.length]}
+                args={[undefined, undefined, secrets.length]}
                 raycast={() => null}
             >
-                <sphereGeometry args={[0.3, 12, 12]} />
-                <meshStandardMaterial
-                    toneMapped={false}
-                    emissiveIntensity={3.5}
-                />
+                <sphereGeometry args={[2, 12, 12]} />
+                <meshBasicMaterial vertexColors />
             </instancedMesh>
         </group>
     );

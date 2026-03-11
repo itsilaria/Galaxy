@@ -1,5 +1,4 @@
 'use client';
-
 import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import { Suspense, useRef, useState, useEffect, useMemo, memo } from 'react';
 import * as THREE from 'three';
@@ -28,7 +27,7 @@ const WarpStars = memo(() => {
 });
 
 const Nebula = memo(() => {
-    const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa', '#33ffaa'];
+    const colors = ['#4433ff', '#6622ff', '#ff33aa', '#33ffaa'];
     const positions = useMemo(() => colors.map(() => new THREE.Vector3(
         (Math.random() - 0.5) * 60,
         (Math.random() - 0.5) * 60,
@@ -41,7 +40,7 @@ const Nebula = memo(() => {
                 <Sparkles
                     key={i}
                     position={positions[i]}
-                    count={150}
+                    count={80}
                     scale={40}
                     size={6}
                     speed={0.1}
@@ -62,13 +61,14 @@ const SceneContent = memo(() => {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
+        const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+        setIsMobile(mobile);
     }, []);
 
     return (
         <>
-            <fog attach="fog" args={['#000000', 10, 100]} />
-            <ambientLight intensity={0.2} />
+            <fog attach="fog" args={['#000000', 10, 120]} />
+            <ambientLight intensity={0.3} />
             <pointLight position={[10, 10, 10]} intensity={1} />
 
             <Suspense fallback={null}>
@@ -76,9 +76,11 @@ const SceneContent = memo(() => {
                     <>
                         <WarpStars />
                         <Nebula />
-                        <Sparkles count={1500} scale={120} size={2} speed={0.4} opacity={0.4} color="#ffeebb" raycast={() => null} />
-                        <Sparkles count={800} scale={60} size={4} speed={0.2} opacity={0.6} color="#ffaaee" raycast={() => null} />
+                        <Sparkles count={1000} scale={120} size={2} speed={0.4} opacity={0.3} color="#ffeebb" raycast={() => null} />
                     </>
+                )}
+                {isMobile && (
+                    <WarpStars />
                 )}
                 <StarField />
                 <CameraController />
@@ -94,6 +96,10 @@ const SceneContent = memo(() => {
                 makeDefault
                 enableDamping={true}
                 dampingFactor={0.05}
+                touches={{
+                    ONE: 1, // ONE finger = rotate (THREE.TOUCH.ROTATE = 0)
+                    TWO: 2, // TWO fingers = dolly-pan (THREE.TOUCH.DOLLY_PAN = 2)
+                }}
             />
         </>
     );
@@ -103,23 +109,45 @@ SceneContent.displayName = 'SceneContent';
 
 export default function Scene() {
     const [isMobile, setIsMobile] = useState(false);
+    const [hasWebGL, setHasWebGL] = useState(true);
 
     useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
+        const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+        setIsMobile(mobile);
+
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) setHasWebGL(false);
+        } catch (e) {
+            setHasWebGL(false);
+        }
     }, []);
+
+    if (!hasWebGL) {
+        return (
+            <div className="w-full h-full bg-black flex items-center justify-center">
+                <p className="text-white/60 text-sm">WebGL not supported on this device</p>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-full bg-black">
             <Canvas
                 camera={{ position: [0, 0, 30], fov: 60 }}
-                dpr={isMobile ? [1, 1] : [1, 2]}
+                dpr={isMobile ? [1, 1.5] : [1, 2]}
                 gl={{
                     antialias: false,
                     alpha: false,
-                    powerPreference: "high-performance",
+                    powerPreference: isMobile ? "low-power" : "high-performance",
                     stencil: false,
                     depth: true,
-                    precision: 'lowp'
+                    precision: isMobile ? 'lowp' : 'mediump',
+                    failIfMajorPerformanceCaveat: false,
+                }}
+                onCreated={({ gl }) => {
+                    gl.setClearColor('#000000');
                 }}
             >
                 <SceneContent />
