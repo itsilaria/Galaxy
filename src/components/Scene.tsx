@@ -85,10 +85,10 @@ const SceneContent = memo(() => {
             </Suspense>
 
             <OrbitControls
-                enablePan={false}
-                enableZoom={!isMobile}
-                minDistance={5}
-                maxDistance={80}
+                enablePan={true}
+                enableZoom={true}
+                minDistance={1}
+                maxDistance={150}
                 autoRotate={!isModalOpen}
                 autoRotateSpeed={0.5}
                 makeDefault

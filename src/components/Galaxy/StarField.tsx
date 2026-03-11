@@ -62,24 +62,11 @@ export default function StarField() {
         if (visualMeshRef.current.instanceColor) visualMeshRef.current.instanceColor.needsUpdate = true;
     });
 
-    const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
+    const handleClick = (e: ThreeEvent<MouseEvent>) => {
         e.stopPropagation();
-        setPointerDownPos({ x: e.clientX, y: e.clientY });
-    };
-
-    const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
-        e.stopPropagation();
-        if (!pointerDownPos || e.instanceId === undefined) return;
-
-        const dx = e.clientX - pointerDownPos.x;
-        const dy = e.clientY - pointerDownPos.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Se il movimento è minimo (tap), seleziona il segreto
-        if (distance < 10 && secrets[e.instanceId]) {
+        if (e.instanceId !== undefined && secrets[e.instanceId]) {
             selectSecret(secrets[e.instanceId]);
         }
-        setPointerDownPos(null);
     };
 
     if (secrets.length === 0) return null;
@@ -90,10 +77,9 @@ export default function StarField() {
             <instancedMesh
                 ref={hitMeshRef}
                 args={[null as any, null as any, secrets.length]}
-                onPointerDown={handlePointerDown}
-                onPointerUp={handlePointerUp}
+                onClick={handleClick}
             >
-                <sphereGeometry args={[2.0, 8, 8]} />
+                <sphereGeometry args={[4.0, 8, 8]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </instancedMesh>
 
