@@ -9,21 +9,29 @@ export interface Secret {
   position?: [number, number, number];
 }
 
+type Language = "en" | "it" | "es" | "fr" | "de" | "jp";
+
 interface GalaxyStore {
   secrets: Secret[];
   selectedSecret: Secret | null;
   isModalOpen: boolean;
+  isStarted: boolean;
+  currentLanguage: Language;
   fetchSecrets: () => Promise<void>;
   addSecret: (text: string) => Promise<void>;
   selectSecret: (secret: Secret) => void;
   closeModal: () => void;
   findMySecret: (id: string) => void;
+  startGalaxy: () => void;
+  setLanguage: (lang: Language) => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
   secrets: [],
   selectedSecret: null,
   isModalOpen: false,
+  isStarted: false,
+  currentLanguage: "en",
 
   fetchSecrets: async () => {
     try {
@@ -80,5 +88,13 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
     } else {
       alert("Segreto non trovato");
     }
+  },
+
+  startGalaxy: () => {
+    set({ isStarted: true });
+  },
+
+  setLanguage: (lang: Language) => {
+    set({ currentLanguage: lang });
   },
 }));
