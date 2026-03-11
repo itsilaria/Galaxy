@@ -149,7 +149,7 @@ export default function Scene() {
                 onCreated={({ gl }) => {
                     gl.setClearColor('#000000');
                 }}
-                frameloop="demand"
+                frameloop="always"
             >
                 <SceneContent />
             </Canvas>

@@ -289,7 +289,7 @@ export default function MobileStarField() {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="absolute inset-0 w-full h-full"
+      className="absolute inset-0 w-full h-full z-0"
       style={{ touchAction: 'none' }}
     />
   );

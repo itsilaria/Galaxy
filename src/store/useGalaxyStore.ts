@@ -17,6 +17,7 @@ interface GalaxyStore {
   isModalOpen: boolean;
   isStarted: boolean;
   isAddingSecret: boolean;
+  isWarping: boolean;
   currentLanguage: Language;
   visitorCount: number;
   fetchSecrets: () => Promise<void>;
@@ -36,14 +37,23 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
   isModalOpen: false,
   isStarted: false,
   isAddingSecret: false,
+  isWarping: false,
   currentLanguage: "en",
   visitorCount: Math.floor(Math.random() * 500) + 100,
 
   fetchSecrets: async () => {
     try {
       const res = await fetch("/api/secrets");
-      const data: Secret[] = await res.json();
-      const secretsWithPos = data.map((s) => ({
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      
+      // Handle both array and error responses
+      if (!Array.isArray(data)) {
+        console.error("Invalid data format:", data);
+        return;
+      }
+      
+      const secretsWithPos = data.map((s: Secret) => ({
         ...s,
         position: s.position || [
           Math.random() * 10 - 5,
@@ -53,7 +63,15 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
       }));
       set({ secrets: secretsWithPos });
     } catch (err) {
-      console.error("Errore fetchSecrets:", err);
+      console.error("Error fetching secrets:", err);
+      // Set some default secrets so the app works
+      set({
+        secrets: [
+          { id: "1", text: "The stars hold our deepest secrets...", position: [-2, 2, 1] },
+          { id: "2", text: "Every light in the sky is a wish waiting to be heard.", position: [3, 1, -2] },
+          { id: "3", text: "In the darkness, we find our truest selves.", position: [0, 3, 0] },
+        ]
+      });
     }
   },
 
