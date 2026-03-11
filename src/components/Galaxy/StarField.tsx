@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { useGalaxyStore } from '@/store/useGalaxyStore';
@@ -60,9 +60,24 @@ export default function StarField() {
         if (visualMeshRef.current.instanceColor) visualMeshRef.current.instanceColor.needsUpdate = true;
     });
 
-    const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    const [pointerDownPos, setPointerDownPos] = useState({ x: 0, y: 0 });
+
+    const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation();
-        if (e.instanceId !== undefined && secrets[e.instanceId]) {
+        setPointerDownPos({ x: e.clientX, y: e.clientY });
+    };
+
+    const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation();
+        if (e.instanceId === undefined) return;
+        
+        const dx = e.clientX - pointerDownPos.x;
+        const dy = e.clientY - pointerDownPos.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        // Se il movimento è minimo (tap < 10px), allora è un click valido
+        if (dist < 10 && secrets[e.instanceId]) {
+            console.log('Star selected via Touch/Click:', secrets[e.instanceId].id);
             selectSecret(secrets[e.instanceId]);
         }
     };
@@ -71,13 +86,14 @@ export default function StarField() {
 
     return (
         <group>
-            {/* Transparent hit-mesh — big spheres for easy click/tap */}
+            {/* Transparent hit-mesh — sfere giganti per il touch */}
             <instancedMesh
                 ref={hitMeshRef}
                 args={[undefined, undefined, secrets.length]}
-                onClick={handleClick}
+                onPointerDown={handlePointerDown}
+                onPointerUp={handlePointerUp}
             >
-                <sphereGeometry args={[5, 8, 8]} />
+                <sphereGeometry args={[6, 8, 8]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </instancedMesh>
 

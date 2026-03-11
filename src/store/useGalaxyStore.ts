@@ -129,7 +129,7 @@ export const useGalaxyStore = create<GalaxyState>()(
             },
         }),
         {
-            name: 'galaxy-secrets-storage-v3',
+            name: 'galaxy-secrets-storage-v4',
             onRehydrateStorage: () => (state) => {
                 state?.setHasHydrated(true);
             },

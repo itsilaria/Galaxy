@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import SecretModal from "@/components/UI/SecretModal";
 import ComposeSecretOverlay from "@/components/UI/ComposeSecretOverlay";
@@ -20,11 +21,18 @@ const Scene = dynamic(() => import("@/components/Scene"), {
 });
 
 export default function Home() {
-    const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
+    const { startAddingSecret, currentLanguage, isStarted, fetchSecrets } = useGalaxyStore();
     const t = translations[currentLanguage as keyof typeof translations];
 
+    // Sincronizza i segreti all'avvio se la galassia è già attiva
+    useEffect(() => {
+        if (isStarted) {
+            fetchSecrets();
+        }
+    }, [isStarted, fetchSecrets]);
+
     return (
-        <main className="w-screen h-screen bg-black overflow-hidden relative font-sans">
+        <main className="w-screen h-screen bg-black overflow-hidden relative font-sans touch-none">
             <WelcomeScreen />
 
             {/* Solo render se la galassia è partita - previene crash iniziali */}
