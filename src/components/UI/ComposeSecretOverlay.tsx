@@ -7,7 +7,7 @@ import { containsProfanity } from '@/utils/profanityFilter';
 
 export default function ComposeSecretOverlay() {
     const { isAddingSecret, cancelAddingSecret, addSecret, currentLanguage } = useGalaxyStore();
-    const t = translations[currentLanguage as keyof typeof translations] as any;
+    const t = (translations[currentLanguage as keyof typeof translations] || translations.en) as any;
     const [text, setText] = useState('');
     const [starType, setStarType] = useState<'standard' | 'supernova'>('standard');
     const [selectedColor, setSelectedColor] = useState('#ffd700'); // Gold as default premium

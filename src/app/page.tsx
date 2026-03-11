@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
     const { startAddingSecret, currentLanguage, isStarted } = useGalaxyStore();
-    const t = translations[currentLanguage as keyof typeof translations];
+    const t = translations[currentLanguage as keyof typeof translations] || translations.en;
     const [isMobile, setIsMobile] = useState(false);
     
     useEffect(() => {

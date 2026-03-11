@@ -16,7 +16,9 @@ interface GalaxyStore {
   selectedSecret: Secret | null;
   isModalOpen: boolean;
   isStarted: boolean;
+  isAddingSecret: boolean;
   currentLanguage: Language;
+  visitorCount: number;
   fetchSecrets: () => Promise<void>;
   addSecret: (text: string) => Promise<void>;
   selectSecret: (secret: Secret) => void;
@@ -24,6 +26,8 @@ interface GalaxyStore {
   findMySecret: (id: string) => void;
   startGalaxy: () => void;
   setLanguage: (lang: Language) => void;
+  startAddingSecret: () => void;
+  cancelAddingSecret: () => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
@@ -31,7 +35,9 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
   selectedSecret: null,
   isModalOpen: false,
   isStarted: false,
+  isAddingSecret: false,
   currentLanguage: "en",
+  visitorCount: Math.floor(Math.random() * 500) + 100,
 
   fetchSecrets: async () => {
     try {
@@ -67,7 +73,7 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newSecret),
       });
-      set({ secrets: [...get().secrets, newSecret] });
+      set({ secrets: [...get().secrets, newSecret], isAddingSecret: false });
     } catch (err) {
       console.error("Errore addSecret:", err);
     }
@@ -96,5 +102,13 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
 
   setLanguage: (lang: Language) => {
     set({ currentLanguage: lang });
+  },
+
+  startAddingSecret: () => {
+    set({ isAddingSecret: true });
+  },
+
+  cancelAddingSecret: () => {
+    set({ isAddingSecret: false });
   },
 }));

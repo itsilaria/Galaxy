@@ -5,7 +5,7 @@ import { translations } from '@/utils/translations';
 
 export default function SupportButton() {
     const currentLanguage = useGalaxyStore((s) => s.currentLanguage);
-    const t = translations[currentLanguage as keyof typeof translations] as any;
+    const t = (translations[currentLanguage as keyof typeof translations] || translations.en) as any;
 
     return (
         <a

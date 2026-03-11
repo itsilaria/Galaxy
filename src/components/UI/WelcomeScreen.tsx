@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 export default function WelcomeScreen() {
     const { isStarted, startGalaxy, currentLanguage } = useGalaxyStore();
-    const t = translations[currentLanguage as keyof typeof translations] as any;
+    const t = (translations[currentLanguage as keyof typeof translations] || translations.en) as any;
     const [isClosing, setIsClosing] = useState(false);
 
     if (isStarted) return null;
