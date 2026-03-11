@@ -8,6 +8,9 @@ export interface Secret {
     color: string;
     timestamp: number;
     language: string;
+    isPremium?: boolean;
+    starType?: 'standard' | 'supernova';
+    glowColor?: string;
 }
 
 type SupportedLanguage = 'en' | 'it' | 'es' | 'fr' | 'de' | 'jp';
@@ -31,7 +34,7 @@ interface GalaxyState {
     closeModal: () => void;
     startAddingSecret: () => void;
     cancelAddingSecret: () => void;
-    addSecret: (text: string) => Promise<void>;
+    addSecret: (text: string, isPremium?: boolean, starType?: 'standard' | 'supernova', glowColor?: string) => Promise<void>;
     fetchSecrets: () => Promise<void>;
     startGalaxy: () => void;
     setHasHydrated: (state: boolean) => void;
@@ -54,7 +57,7 @@ export const useGalaxyStore = create<GalaxyState>()(
             isLoading: false,
 
             setHasHydrated: (state) => set({ _hasHydrated: state }),
-
+            
             setLanguage: (lang) => {
                 if (languageChangeTimeout) clearTimeout(languageChangeTimeout);
                 set({ isWarping: true, currentLanguage: lang });
@@ -63,7 +66,7 @@ export const useGalaxyStore = create<GalaxyState>()(
                     languageChangeTimeout = null;
                 }, 1000);
             },
-
+            
             selectSecret: (secret) => set({ selectedSecret: secret, isModalOpen: !!secret }),
             openModal: () => set({ isModalOpen: true }),
             closeModal: () => set({ isModalOpen: false, selectedSecret: null }),
@@ -79,8 +82,10 @@ export const useGalaxyStore = create<GalaxyState>()(
                     set({ isLoading: true });
                     const response = await fetch('/api/secrets');
                     const data = await response.json();
-                    if (data.secrets) {
+                    if (data.secrets && data.secrets.length > 0) {
                         set({ secrets: data.secrets, isLoading: false });
+                    } else {
+                        set({ isLoading: false });
                     }
                 } catch (error) {
                     console.error('Error fetching secrets:', error);
@@ -88,30 +93,33 @@ export const useGalaxyStore = create<GalaxyState>()(
                 }
             },
 
-            addSecret: async (text: string) => {
+            addSecret: async (text, isPremium, starType, glowColor) => {
                 try {
-                    const newSecret = {
+                    const newSecretPayload = {
                         text,
                         position: [
-                            (Math.random() - 0.5) * 40,
-                            (Math.random() - 0.5) * 40,
-                            (Math.random() - 0.5) * 40
+                            (Math.random() - 0.5) * 60,
+                            (Math.random() - 0.5) * 60,
+                            (Math.random() - 0.5) * 60
                         ] as [number, number, number],
-                        color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                        color: isPremium ? (glowColor || '#ffd700') : '#ffffff',
                         language: get().currentLanguage,
+                        isPremium,
+                        starType,
+                        glowColor
                     };
 
                     const response = await fetch('/api/secrets', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(newSecret),
+                        body: JSON.stringify(newSecretPayload),
                     });
 
                     const data = await response.json();
                     if (data.success && data.secret) {
-                        set((state) => ({
+                        set((state) => ({ 
                             secrets: [...state.secrets, data.secret],
-                            isAddingSecret: false
+                            isAddingSecret: false 
                         }));
                     }
                 } catch (error) {
@@ -121,12 +129,14 @@ export const useGalaxyStore = create<GalaxyState>()(
             },
         }),
         {
-            name: 'galaxy-secrets-storage-v2',
+            name: 'galaxy-secrets-storage-v3',
             onRehydrateStorage: () => (state) => {
                 state?.setHasHydrated(true);
             },
-            partialize: (state) => ({
-                currentLanguage: state.currentLanguage
+            partialize: (state) => ({ 
+                currentLanguage: state.currentLanguage,
+                secrets: state.secrets, // Persistiamo i segreti localmente per velocità
+                isStarted: state.isStarted
             }),
         }
     )
